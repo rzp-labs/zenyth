@@ -28,7 +28,45 @@ Examples:
 """
 
 from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any
+
+
+class SPARCPhase(Enum):
+    """Enumeration of SPARC methodology phases.
+
+    Defines the complete set of phases in the SPARC workflow following
+    the established methodology with homelab-specific additions.
+    """
+
+    SPECIFICATION = "specification"
+    PSEUDOCODE = "pseudocode"
+    ARCHITECTURE = "architecture"
+    REFINEMENT = "refinement"
+    COMPLETION = "completion"
+    VALIDATION = "validation"
+    INTEGRATION = "integration"
+
+
+@dataclass(frozen=True)
+class PhaseContext:
+    """Immutable context container for individual phase execution.
+
+    Provides the necessary context and state for executing a single SPARC
+    phase, including session information, task details, and accumulated
+    artifacts from previous phases.
+
+    Attributes:
+        session_id: Unique identifier for the parent orchestration session
+        task_description: The original task description or current focus
+        previous_phases: List of PhaseResult objects from completed phases
+        global_artifacts: Shared artifacts accessible to all phases
+    """
+
+    session_id: str
+    task_description: str | None
+    previous_phases: list["PhaseResult"] = field(default_factory=list)
+    global_artifacts: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -44,24 +82,22 @@ class PhaseResult:
     of results after creation, which is critical for audit trails and debugging.
 
     Attributes:
-        success: Whether the phase execution completed successfully without errors.
-                Used for workflow control and error handling decisions.
-        output: The primary textual output produced by the phase execution.
-               Contains generated content, analysis results, or completion messages.
-               Never None - empty string indicates no output produced.
-        error: Optional error message if phase execution failed or encountered issues.
-              None indicates successful execution. When present, contains detailed
-              error information for debugging and user feedback.
+        phase_name: The name/identifier of the SPARC phase that was executed
+        artifacts: Dictionary of artifacts produced by this phase execution
+        next_phase: Optional identifier of the next phase to execute
         metadata: Additional execution context and metrics as key-value pairs.
                  Common keys include 'duration', 'tokens_used', 'tool_calls',
-                 'timestamp', 'phase_name'. Defaults to empty dict if not provided.
+                 'timestamp', 'session_id'. Defaults to empty dict if not provided.
 
     Examples:
         Successful phase execution::
 
             result = PhaseResult(
-                success=True,
-                output="Architecture design completed with 3 components",
+                phase_name="architecture",
+                artifacts={
+                    "design_document": "Component architecture with 3 services...",
+                    "component_diagram": "diagram_data"
+                },
                 metadata={
                     "duration": 2.3,
                     "tokens_used": 245,
@@ -69,18 +105,18 @@ class PhaseResult:
                 }
             )
 
-        Failed phase execution::
+        Phase with next phase transition::
 
             result = PhaseResult(
-                success=False,
-                output="",
-                error="Invalid specification format: missing required sections",
-                metadata={"attempted_at": "2024-01-01T10:30:00Z"}
+                phase_name="specification",
+                artifacts={"spec_document": "Requirements analysis..."},
+                next_phase="architecture",
+                metadata={"session_id": "sparc-123"}
             )
 
-        Minimal successful result::
+        Minimal phase result::
 
-            result = PhaseResult(success=True, output="Task completed")
+            result = PhaseResult(phase_name="completion")
 
     Note:
         PhaseResult instances are immutable after creation. Any attempt to modify
@@ -88,9 +124,9 @@ class PhaseResult:
         prevents accidental corruption in multi-threaded environments.
     """
 
-    success: bool
-    output: str
-    error: str | None = None
+    phase_name: str
+    artifacts: dict[str, Any] = field(default_factory=dict)
+    next_phase: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
 
 

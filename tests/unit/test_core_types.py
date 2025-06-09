@@ -45,87 +45,89 @@ import pytest
 from zenyth.core.types import PhaseResult, SessionContext
 
 
-def test_phase_result_accepts_success_field():
-    """Test PhaseResult accepts success field."""
+def test_phase_result_accepts_phase_name_field():
+    """Test PhaseResult accepts phase_name field."""
 
-    result = PhaseResult(success=True, output="test")
-    assert result.success is True
-
-
-def test_phase_result_accepts_output_field():
-    """Test PhaseResult accepts output field."""
-
-    result = PhaseResult(success=True, output="test output")
-    assert result.output == "test output"
+    result = PhaseResult(phase_name="specification")
+    assert result.phase_name == "specification"
 
 
-def test_phase_result_stores_error_when_provided():
-    """Test PhaseResult stores error field when provided."""
+def test_phase_result_accepts_artifacts_field():
+    """Test PhaseResult accepts artifacts field."""
 
-    result = PhaseResult(success=False, output="", error="Test error")
-    assert result.error == "Test error"
-
-
-def test_phase_result_defaults_error_to_none():
-    """Test PhaseResult defaults error to None when not provided."""
-
-    result = PhaseResult(success=True, output="test")
-    assert result.error is None
+    artifacts = {"document": "test output"}
+    result = PhaseResult(phase_name="specification", artifacts=artifacts)
+    assert result.artifacts == artifacts
 
 
 def test_phase_result_stores_metadata_when_provided():
     """Test PhaseResult stores metadata field when provided."""
 
+    metadata = {"duration": 1.5, "tokens": 100}
+    result = PhaseResult(phase_name="specification", metadata=metadata)
+    assert result.metadata == metadata
+
+
+def test_phase_result_defaults_next_phase_to_none():
+    """Test PhaseResult defaults next_phase to None when not provided."""
+
+    result = PhaseResult(phase_name="specification")
+    assert result.next_phase is None
+
+
+def test_phase_result_stores_metadata_when_provided_updated():
+    """Test PhaseResult stores metadata field when provided."""
+
     metadata = {"duration": 1.5}
-    result = PhaseResult(success=True, output="test", metadata=metadata)
+    result = PhaseResult(phase_name="specification", metadata=metadata)
     assert result.metadata == metadata
 
 
 def test_phase_result_defaults_metadata_to_empty_dict():
     """Test PhaseResult defaults metadata to empty dict when not provided."""
 
-    result = PhaseResult(success=True, output="test")
+    result = PhaseResult(phase_name="specification")
     assert result.metadata == {}
 
 
 def test_phase_result_provides_string_representation():
     """Test PhaseResult provides string representation."""
 
-    result = PhaseResult(success=True, output="test")
+    result = PhaseResult(phase_name="specification")
     assert str(result) is not None
     assert len(str(result)) > 0
 
 
-def test_phase_result_string_contains_success_status():
-    """Test PhaseResult string representation contains success status."""
+def test_phase_result_string_contains_phase_name():
+    """Test PhaseResult string representation contains phase name."""
 
-    result = PhaseResult(success=True, output="test")
-    assert "success=True" in str(result)
+    result = PhaseResult(phase_name="specification")
+    assert "specification" in str(result)
 
 
 def test_phase_result_supports_equality_comparison():
     """Test PhaseResult supports equality comparison."""
 
-    result1 = PhaseResult(success=True, output="test")
-    result2 = PhaseResult(success=True, output="test")
+    result1 = PhaseResult(phase_name="specification")
+    result2 = PhaseResult(phase_name="specification")
     assert result1 == result2
 
 
 def test_phase_result_detects_inequality():
     """Test PhaseResult detects inequality correctly."""
 
-    result1 = PhaseResult(success=True, output="test")
-    result2 = PhaseResult(success=False, output="test")
+    result1 = PhaseResult(phase_name="specification")
+    result2 = PhaseResult(phase_name="architecture")
     assert result1 != result2
 
 
 def test_phase_result_prevents_field_modification():
     """Test PhaseResult prevents modification of fields after creation."""
 
-    result = PhaseResult(success=True, output="test")
+    result = PhaseResult(phase_name="specification")
 
     with pytest.raises(AttributeError):
-        result.success = False
+        result.phase_name = "architecture"
 
 
 def test_session_context_accepts_session_id_field():
@@ -197,20 +199,20 @@ def test_session_context_prevents_field_modification():
         context.session_id = "modified"
 
 
-def test_phase_result_with_error():
-    """Test PhaseResult with error information."""
+def test_phase_result_with_artifacts():
+    """Test PhaseResult with artifacts information."""
 
-    result = PhaseResult(success=False, output="", error="Test error message")
-    assert result.success is False
-    assert not result.output
-    assert result.error == "Test error message"
+    artifacts = {"document": "Test document content", "metadata": {"status": "complete"}}
+    result = PhaseResult(phase_name="specification", artifacts=artifacts)
+    assert result.artifacts == artifacts
+    assert result.artifacts["document"] == "Test document content"
 
 
-def test_phase_result_with_metadata():
+def test_phase_result_with_metadata_detailed():
     """Test PhaseResult with metadata."""
 
     metadata = {"duration": 1.5, "tokens_used": 150}
-    result = PhaseResult(success=True, output="test", metadata=metadata)
+    result = PhaseResult(phase_name="specification", metadata=metadata)
     assert result.metadata == metadata
     assert result.metadata["duration"] == 1.5
 
@@ -218,26 +220,26 @@ def test_phase_result_with_metadata():
 def test_phase_result_optional_fields():
     """Test PhaseResult with optional fields."""
 
-    result = PhaseResult(success=True, output="test")
-    assert result.error is None
+    result = PhaseResult(phase_name="specification")
+    assert result.next_phase is None
     assert result.metadata == {}
+    assert result.artifacts == {}
 
 
 def test_phase_result_str_representation():
     """Test PhaseResult string representation."""
 
-    result = PhaseResult(success=True, output="test output")
+    result = PhaseResult(phase_name="specification", artifacts={"doc": "test output"})
     str_repr = str(result)
-    assert "success=True" in str_repr
-    assert "test output" in str_repr
+    assert "specification" in str_repr
 
 
 def test_phase_result_equality():
     """Test PhaseResult equality comparison."""
 
-    result1 = PhaseResult(success=True, output="test")
-    result2 = PhaseResult(success=True, output="test")
-    result3 = PhaseResult(success=False, output="test")
+    result1 = PhaseResult(phase_name="specification", artifacts={"doc": "test"})
+    result2 = PhaseResult(phase_name="specification", artifacts={"doc": "test"})
+    result3 = PhaseResult(phase_name="architecture", artifacts={"doc": "test"})
 
     assert result1 == result2
     assert result1 != result3
@@ -246,11 +248,11 @@ def test_phase_result_equality():
 def test_phase_result_immutable():
     """Test that PhaseResult is immutable after creation."""
 
-    result = PhaseResult(success=True, output="test")
+    result = PhaseResult(phase_name="specification")
 
     # Should raise AttributeError when trying to modify
     with pytest.raises(AttributeError):
-        result.success = False
+        result.phase_name = "architecture"
 
 
 def test_session_context_initialization():

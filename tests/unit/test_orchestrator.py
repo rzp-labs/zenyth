@@ -29,6 +29,8 @@ Examples:
 
 import inspect
 
+import pytest
+
 from zenyth.orchestration import SPARCOrchestrator
 
 
@@ -70,6 +72,7 @@ def test_sparc_orchestrator_has_execute_method():
     assert inspect.iscoroutinefunction(orchestrator.execute)
 
 
+@pytest.mark.asyncio()
 async def test_sparc_orchestrator_execute_signature():
     """Test that execute method has correct parameter signature.
 
@@ -78,9 +81,7 @@ async def test_sparc_orchestrator_execute_signature():
     """
     # Provide valid mock dependencies for successful execution
     orchestrator = SPARCOrchestrator(
-        llm_provider="mock_llm", 
-        tool_registry="mock_tools", 
-        state_manager="mock_state"
+        llm_provider="mock_llm", tool_registry="mock_tools", state_manager="mock_state"
     )
 
     # Execute should accept task string and return WorkflowResult
@@ -126,10 +127,18 @@ def test_sparc_orchestrator_follows_solid_principles():
     # Should not have methods for specific phase logic, tool management,
     # state persistence, or LLM communication - those are separate responsibilities
     # Only check callable methods, not dependency attributes (which are acceptable)
-    all_methods = [attr for attr in dir(orchestrator) if callable(getattr(orchestrator, attr)) and not attr.startswith('_')]
+    all_methods = [
+        attr
+        for attr in dir(orchestrator)
+        if callable(getattr(orchestrator, attr)) and not attr.startswith("_")
+    ]
     phase_methods = [attr for attr in all_methods if "phase" in attr.lower()]
-    tool_methods = [attr for attr in all_methods if "tool" in attr.lower() and attr not in ['tool_registry']]  # Exclude dependency attributes
-    llm_methods = [attr for attr in all_methods if "llm" in attr.lower() and attr not in ['llm_provider']]  # Exclude dependency attributes
+    tool_methods = [
+        attr for attr in all_methods if "tool" in attr.lower() and attr != "tool_registry"
+    ]  # Exclude dependency attributes
+    llm_methods = [
+        attr for attr in all_methods if "llm" in attr.lower() and attr != "llm_provider"
+    ]  # Exclude dependency attributes
 
     # Should only have orchestration-related methods, not specific implementations
     assert len(phase_methods) == 0, "Orchestrator should not contain phase-specific methods"
