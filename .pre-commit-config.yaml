@@ -158,7 +158,7 @@ repos:
     stages: [ commit ]
 
   - id: check-atomicity
-    name: Check for atomicity violations  
+    name: Check for atomicity violations
     entry: python scripts/check_atomicity.py
     language: python
     types: [ python ]

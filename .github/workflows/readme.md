@@ -11,7 +11,7 @@ Comprehensive code quality analysis using SonarCloud, including:
 - Quality metrics collection
 - Automated reporting
 
-### `quality-gate.yml` - Quality Gate Enforcement  
+### `quality-gate.yml` - Quality Gate Enforcement
 Enforces quality standards on pull requests:
 - Code formatting (Black)
 - Linting (Ruff)
