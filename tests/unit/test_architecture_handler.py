@@ -131,7 +131,11 @@ async def test_architecture_handler_uses_injected_strategies(
     mock_system_designer: SystemDesigner,
     mock_architecture_diagrammer: ArchitectureDiagrammer,
 ) -> None:
-    """Test that handler uses injected strategy dependencies."""
+    """
+    Verifies that ArchitectureHandler uses the injected SystemDesigner and ArchitectureDiagrammer during execution.
+    
+    Ensures that the analyze and generate methods of the injected strategy dependencies are each called exactly once when executing the handler.
+    """
     await architecture_handler.execute(phase_context)
 
     mock_system_designer.analyze.assert_called_once()
@@ -143,7 +147,9 @@ async def test_architecture_handler_instance_configuration_affects_behavior(
     mock_architecture_diagrammer: ArchitectureDiagrammer,
     phase_context: PhaseContext,
 ) -> None:
-    """Test that instance configuration meaningfully affects behavior."""
+    """
+    Verifies that changing the instance configuration of ArchitectureHandler alters the execution result metadata.
+    """
     handler_with_different_config = ArchitectureHandler(
         system_designer=mock_system_designer,
         architecture_diagrammer=mock_architecture_diagrammer,
@@ -188,7 +194,11 @@ def phase_context_with_api() -> PhaseContext:
 async def test_basic_system_designer_uses_instance_configuration(
     phase_context_with_api: PhaseContext,
 ) -> None:
-    """Test that designer uses instance configuration meaningfully."""
+    """
+    Verifies that BasicSystemDesigner instance configuration affects system analysis results.
+    
+    This test ensures that different configurations of BasicSystemDesigner produce distinct analysis outputs when analyzing the same phase context.
+    """
     # Designer with caching enabled
     designer_with_caching = BasicSystemDesigner(
         include_caching=True, prefer_microservices=False, min_component_threshold=1
@@ -246,7 +256,9 @@ def system_analysis() -> dict[str, Any]:
 async def test_basic_architecture_diagrammer_uses_instance_configuration(
     system_analysis: dict[str, Any],
 ) -> None:
-    """Test that diagrammer uses instance configuration meaningfully."""
+    """
+    Verifies that BasicArchitectureDiagrammer produces different diagram outputs when instance configuration parameters are changed.
+    """
     # Diagrammer with metadata enabled
     diagrammer_with_metadata = BasicArchitectureDiagrammer(
         diagram_format="mermaid", include_metadata=True, max_components_per_diagram=5
@@ -272,7 +284,11 @@ async def test_basic_architecture_diagrammer_creates_diagram(
     basic_architecture_diagrammer: BasicArchitectureDiagrammer,
     system_analysis: dict[str, Any],
 ) -> None:
-    """Test that diagrammer creates diagram from analysis."""
+    """
+    Verifies that BasicArchitectureDiagrammer generates a valid diagram from a system analysis.
+    
+    Asserts that the generated diagram includes diagram type, content, and metadata, and that the content is a non-empty string.
+    """
     diagram = await basic_architecture_diagrammer.generate(
         "Test task", system_analysis, "session-123"
     )

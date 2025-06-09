@@ -21,10 +21,10 @@ from zenyth.core.types import SessionContext, SPARCPhase
 
 
 def test_itool_registry_protocol_exists() -> None:
-    """Test that IToolRegistry protocol is properly defined.
-
-    Validates Interface Segregation Principle - focused tool registry contract.
-    Tests protocol definition and runtime checking capability.
+    """
+    Verifies that the IToolRegistry protocol is correctly defined as a typing.Protocol.
+    
+    Asserts the presence of protocol-specific attributes and metaclass to ensure proper protocol behavior and runtime type checking.
     """
     # Should be able to import and check as protocol
     assert hasattr(IToolRegistry, "_is_protocol")
@@ -32,10 +32,10 @@ def test_itool_registry_protocol_exists() -> None:
 
 
 def test_itool_registry_get_for_phase_signature() -> None:
-    """Test IToolRegistry get_for_phase method signature.
-
-    Validates Single Responsibility - focused on providing tools for phases.
-    Tests interface contract definition for tool retrieval.
+    """
+    Verifies that IToolRegistry defines a callable get_for_phase method with the correct signature.
+    
+    Ensures the method accepts a SPARCPhase argument and returns a list of tools, confirming interface contract adherence.
     """
     # Create mock implementation to test interface compliance
     mock_registry = Mock(spec=IToolRegistry)
@@ -63,9 +63,21 @@ def test_itool_registry_runtime_checking() -> None:
     # Create correct implementation with instance state
     class ValidToolRegistry:
         def __init__(self) -> None:
+            """
+            Initializes the mock tool registry with a default tool cache.
+            """
             self.tool_cache = {"default": ["tool1", "tool2"]}
 
         def get_for_phase(self, phase: SPARCPhase) -> list[Any]:
+            """
+            Retrieves a list of tools associated with the specified SPARC phase.
+            
+            Args:
+                phase: The SPARCPhase for which to retrieve tools.
+            
+            Returns:
+                A list of tools relevant to the given phase, or an empty list if none are found.
+            """
             return self.tool_cache.get("default", [])
 
     # Create incorrect implementation (missing method)
@@ -93,10 +105,10 @@ def test_istate_manager_protocol_exists() -> None:
 
 
 def test_istate_manager_save_session_signature() -> None:
-    """Test IStateManager save_session method signature.
-
-    Validates Single Responsibility - focused on session state persistence.
-    Tests async interface contract for saving session state.
+    """
+    Verifies that IStateManager defines an async save_session method.
+    
+    Ensures the protocol exposes the required method for session state persistence and that it is callable.
     """
     # Create mock implementation to test interface compliance
     mock_manager = Mock(spec=IStateManager)
@@ -122,21 +134,37 @@ def test_istate_manager_load_session_signature() -> None:
 
 @pytest.mark.asyncio()
 async def test_istate_manager_full_interface() -> None:
-    """Test complete IStateManager interface with async methods.
-
-    Validates Open/Closed Principle - interface closed for modification.
-    Tests full async interface contract implementation.
+    """
+    Validates that a mock implementation of IStateManager correctly saves and loads session contexts asynchronously.
+    
+    This test ensures that the full async interface contract for IStateManager is honored, verifying that session data can be stored and retrieved as expected.
     """
 
     # Create mock that simulates async behavior
     class MockStateManager:
         def __init__(self):
+            Initializes the mock state manager with an empty session storage dictionary.
             self.sessions = {}
 
         async def save_session(self, session: SessionContext) -> None:
+            """
+            Saves a session context to the internal session store.
+            
+            Args:
+                session: The session context to be saved, identified by its session_id.
+            """
             self.sessions[session.session_id] = session
 
         async def load_session(self, session_id: str) -> SessionContext:
+            """
+            Retrieves a session context by its session ID.
+            
+            Args:
+                session_id: The unique identifier of the session to load.
+            
+            Returns:
+                The SessionContext associated with the given session ID, or None if not found.
+            """
             return self.sessions.get(session_id)
 
     manager = MockStateManager()
@@ -160,26 +188,48 @@ async def test_istate_manager_full_interface() -> None:
 
 
 def test_istate_manager_runtime_checking() -> None:
-    """Test IStateManager runtime protocol checking.
-
-    Validates Liskov Substitution - implementations must honor protocol contract.
-    Tests that implementations with correct methods pass runtime checks.
+    """
+    Tests that only classes implementing all required IStateManager protocol methods pass runtime type checks.
+    
+    Ensures that valid implementations with both async `save_session` and `load_session` methods are recognized as IStateManager, while incomplete implementations are not.
     """
 
     # Create correct implementation with instance state
     class ValidStateManager:
         def __init__(self) -> None:
+            Initializes the mock state manager with an empty session storage dictionary.
             self.sessions: dict[str, SessionContext] = {}
 
         async def load_session(self, session_id: str) -> SessionContext:
+            """
+            Loads a session context for the given session ID.
+            
+            Args:
+                session_id: The unique identifier of the session to load.
+            
+            Returns:
+                The SessionContext associated with the session ID, or a new SessionContext if none exists.
+            """
             return self.sessions.get(session_id, SessionContext(session_id=session_id, task="test"))
 
         async def save_session(self, session: SessionContext) -> None:
+            """
+            Saves a session context to the internal session store.
+            
+            Args:
+                session: The session context to be saved, identified by its session_id.
+            """
             self.sessions[session.session_id] = session
 
     # Create incorrect implementation (missing method)
     class InvalidStateManager:
         async def save_session(self, session: SessionContext) -> None:
+            """
+            Persists the provided session context asynchronously.
+            
+            Args:
+                session: The session context to be saved.
+            """
             pass
 
         # Missing load_session method
@@ -193,18 +243,30 @@ def test_istate_manager_runtime_checking() -> None:
 
 
 def test_llm_interface_protocol_still_works() -> None:
-    """Test that existing LLMInterface protocol remains functional.
-
-    Validates Dependency Inversion - protocols enable abstraction dependencies.
-    Ensures backward compatibility with existing LLM interface.
+    """
+    Verifies that a mock implementation satisfies the LLMInterface protocol.
+    
+    Ensures that a class with an async `generate` method passes runtime type checks and maintains compatibility with the LLMInterface abstraction.
     """
 
     # Create mock LLM implementation with instance state
     class MockLLMProvider:
         def __init__(self) -> None:
+            """
+            Initializes the mock LLM provider with a predefined response prefix.
+            """
             self.response_prefix = "Generated response to: "
 
         async def generate(self, prompt: str, **kwargs: Any) -> str:
+            """
+            Generates a response string by prefixing the prompt with a predefined value.
+            
+            Args:
+                prompt: The input string to be processed.
+            
+            Returns:
+                The generated string with the response prefix prepended to the prompt.
+            """
             return f"{self.response_prefix}{prompt}"
 
     provider = MockLLMProvider()
@@ -218,10 +280,10 @@ def test_llm_interface_protocol_still_works() -> None:
 
 
 def test_protocol_separation_of_concerns() -> None:
-    """Test that protocols maintain proper separation of concerns.
-
-    Validates Interface Segregation - each protocol has focused responsibility.
-    Tests that protocols don't have overlapping or conflicting methods.
+    """
+    Verifies that each protocol exposes only methods relevant to its domain, ensuring separation of concerns.
+    
+    Asserts that IToolRegistry, IStateManager, and LLMInterface maintain focused responsibilities by checking their method names for domain-specific keywords.
     """
     # IToolRegistry should only deal with tools
     tool_methods = [attr for attr in dir(IToolRegistry) if not attr.startswith("_")]
@@ -237,10 +299,10 @@ def test_protocol_separation_of_concerns() -> None:
 
 
 def test_dependency_inversion_enablement() -> None:
-    """Test that protocols enable proper dependency inversion.
-
-    Validates Dependency Inversion Principle - depend on abstractions.
-    Tests that high-level code can depend on these protocol abstractions.
+    """
+    Verifies that protocol abstractions support dependency inversion by allowing high-level components to depend on them.
+    
+    This test ensures that instances of `LLMInterface`, `IToolRegistry`, and `IStateManager` can be injected into a high-level orchestrator, confirming that the protocols enable proper dependency injection and storage of dependencies.
     """
 
     # Simulate high-level component depending on abstractions
@@ -251,12 +313,25 @@ def test_dependency_inversion_enablement() -> None:
             tool_registry: IToolRegistry,
             state_manager: IStateManager,
         ):
+            """
+            Initializes the orchestrator with LLM, tool registry, and state manager dependencies.
+            
+            Args:
+                llm_provider: An implementation of the LLMInterface protocol.
+                tool_registry: An implementation of the IToolRegistry protocol.
+                state_manager: An implementation of the IStateManager protocol.
+            """
             self.llm_provider = llm_provider
             self.tool_registry = tool_registry
             self.state_manager = state_manager
 
         def has_dependencies(self) -> bool:
-            """Check if all dependencies are available."""
+            """
+            Determines whether all required dependencies are present.
+            
+            Returns:
+                True if the LLM provider, tool registry, and state manager are all set; otherwise, False.
+            """
             return all(
                 [
                     self.llm_provider is not None,

@@ -104,10 +104,10 @@ def test_workflow_result_immutability() -> None:
 
 
 def test_workflow_result_with_phase_results() -> None:
-    """Test WorkflowResult containing multiple PhaseResult objects.
-
-    Validates Dependency Inversion - depends on PhaseResult abstraction.
-    Tests composition over inheritance pattern.
+    """
+    Tests that a WorkflowResult can contain multiple PhaseResult objects with distinct artifacts and metadata.
+    
+    Verifies correct composition of phase results within the workflow outcome and ensures that nested phase data is accessible and accurate.
     """
     phase1 = PhaseResult(
         phase_name="specification",

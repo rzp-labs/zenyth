@@ -25,12 +25,27 @@ class MockPhaseHandler(PhaseHandler):
     """
 
     def __init__(self, phase_name: str):
+        """
+        Initializes a MockPhaseHandler with a given phase name.
+        
+        Args:
+            phase_name: The name of the phase this handler is associated with.
+        """
         self.phase_name = phase_name
         self.execute_called = False
         self.validate_called = False
         self.call_count = 0
 
     async def execute(self, context: PhaseContext) -> PhaseResult:
+        """
+        Executes the mock phase handler and returns a PhaseResult with test artifacts and metadata.
+        
+        Args:
+            context: The phase execution context.
+        
+        Returns:
+            A PhaseResult containing mock artifacts and metadata, including the handler type and call count.
+        """
         self.execute_called = True
         return PhaseResult(
             phase_name=self.phase_name,
@@ -39,6 +54,11 @@ class MockPhaseHandler(PhaseHandler):
         )
 
     def validate_prerequisites(self, context: PhaseContext) -> bool:
+        """
+        Checks if the phase prerequisites are met based on the provided context.
+        
+        Returns True if the context's task description is not None; otherwise, returns False.
+        """
         self.validate_called = True
         self.call_count += 1
         return context.task_description is not None
@@ -51,9 +71,21 @@ class AnotherMockHandler(PhaseHandler):
     """
 
     def __init__(self) -> None:
+        """
+        Initializes the handler with a predefined response suffix for result differentiation.
+        """
         self.response_suffix = "_different_result"
 
     async def execute(self, context: PhaseContext) -> PhaseResult:
+        """
+        Executes the handler for the "alternative" phase and returns the result.
+        
+        Args:
+            context: The phase execution context.
+        
+        Returns:
+            A PhaseResult containing artifacts with an alternative output string.
+        """
         return PhaseResult(
             phase_name="alternative",
             artifacts={"alternative_output": f"alternative{self.response_suffix}"},
@@ -61,15 +93,21 @@ class AnotherMockHandler(PhaseHandler):
 
     def validate_prerequisites(self, context: PhaseContext) -> bool:
         # Use instance state to avoid static method warning
+        """
+        Checks if the task description length exceeds the required minimum.
+        
+        Returns:
+            True if the length of the task description is greater than the length of the handler's response suffix; otherwise, False.
+        """
         min_length = len(self.response_suffix)
         return len(context.task_description or "") > min_length
 
 
 def test_phase_handler_registry_creation() -> None:
-    """Test PhaseHandlerRegistry instantiation.
-
-    Validates Single Responsibility - registry creation without side effects.
-    Tests basic registry initialization and empty state.
+    """
+    Tests that a PhaseHandlerRegistry can be instantiated and is initially empty.
+    
+    Asserts that the registry is created successfully and contains no registered phases upon initialization.
     """
     registry = PhaseHandlerRegistry()
 
@@ -84,10 +122,10 @@ def test_phase_handler_registry_creation() -> None:
 
 
 def test_phase_handler_registry_register_single_handler() -> None:
-    """Test registering a single phase handler.
-
-    Validates Open/Closed Principle - registry open for extension via registration.
-    Tests basic registration functionality with SPARCPhase enum.
+    """
+    Tests that a single handler can be registered for a SPARC phase and is listed correctly.
+    
+    Ensures the registry supports extension by allowing new handler registrations.
     """
     registry = PhaseHandlerRegistry()
     handler_class = MockPhaseHandler
@@ -123,10 +161,10 @@ def test_phase_handler_registry_register_multiple_handlers() -> None:
 
 
 def test_phase_handler_registry_get_handler() -> None:
-    """Test retrieving registered phase handler.
-
-    Validates Dependency Inversion - registry depends on PhaseHandler abstraction.
-    Tests that retrieved handlers implement the PhaseHandler contract.
+    """
+    Tests retrieval of a registered phase handler from the registry.
+    
+    Asserts that the returned handler is an instance of both the registered class and the PhaseHandler interface.
     """
     registry = PhaseHandlerRegistry()
     registry.register(SPARCPhase.SPECIFICATION, MockPhaseHandler)
@@ -141,10 +179,10 @@ def test_phase_handler_registry_get_handler() -> None:
 
 
 def test_phase_handler_registry_get_handler_with_args() -> None:
-    """Test retrieving handler that requires constructor arguments.
-
-    Validates registry can handle handlers with initialization parameters.
-    Tests dependency injection pattern through registry.
+    """
+    Tests that the registry can retrieve a handler requiring constructor arguments.
+    
+    Ensures that handlers registered with initialization parameters are correctly instantiated and returned by the registry.
     """
     registry = PhaseHandlerRegistry()
 
@@ -158,10 +196,10 @@ def test_phase_handler_registry_get_handler_with_args() -> None:
 
 
 def test_phase_handler_registry_get_unregistered_handler() -> None:
-    """Test retrieving handler for unregistered phase.
-
-    Validates proper error handling for missing phase mappings.
-    Tests registry robustness and clear error reporting.
+    """
+    Tests that retrieving a handler for an unregistered phase raises a ValueError.
+    
+    Ensures the registry provides clear error reporting when a handler has not been registered for a requested phase.
     """
     registry = PhaseHandlerRegistry()
 
@@ -191,10 +229,10 @@ def test_phase_handler_registry_overwrite_registration() -> None:
 
 
 def test_phase_handler_registry_handler_contract_compliance() -> None:
-    """Test that retrieved handlers comply with PhaseHandler contract.
-
-    Validates Liskov Substitution - all handlers are substitutable.
-    Tests that registry ensures contract compliance.
+    """
+    Verifies that handlers retrieved from the registry implement the required PhaseHandler interface methods.
+    
+    Asserts that each handler provides callable `execute` and `validate_prerequisites` methods, ensuring contract compliance.
     """
     registry = PhaseHandlerRegistry()
     registry.register(SPARCPhase.SPECIFICATION, MockPhaseHandler)
@@ -210,10 +248,10 @@ def test_phase_handler_registry_handler_contract_compliance() -> None:
 
 @pytest.mark.asyncio()
 async def test_phase_handler_registry_execute_retrieved_handler() -> None:
-    """Test executing handler retrieved from registry.
-
-    Validates complete integration between registry and handler execution.
-    Tests that registry provides fully functional handler instances.
+    """
+    Executes a handler retrieved from the registry and verifies its integration.
+    
+    Ensures that a handler obtained from the registry can validate prerequisites and execute successfully, returning a valid PhaseResult with expected artifacts and metadata.
     """
     registry = PhaseHandlerRegistry()
     registry.register(SPARCPhase.SPECIFICATION, MockPhaseHandler, "spec_test")
@@ -239,10 +277,10 @@ async def test_phase_handler_registry_execute_retrieved_handler() -> None:
 
 
 def test_phase_handler_registry_list_phases_consistency() -> None:
-    """Test that list_phases returns consistent results.
-
-    Validates Interface Segregation - focused query interface.
-    Tests registry state consistency and proper enumeration.
+    """
+    Tests that the PhaseHandlerRegistry's list_phases method consistently returns accurate and ordered phase listings after registrations.
+    
+    Ensures the registry's phase enumeration remains stable and reflects the current state.
     """
     registry = PhaseHandlerRegistry()
 
@@ -268,10 +306,11 @@ def test_phase_handler_registry_list_phases_consistency() -> None:
 
 
 def test_phase_handler_registry_thread_safety_simulation() -> None:
-    """Test registry behavior under simulated concurrent access.
-
-    Validates registry robustness for concurrent registration/retrieval.
-    Tests that registry maintains consistency under load.
+    """
+    Simulates concurrent-like registrations and retrievals to verify registry consistency.
+    
+    Registers multiple handlers for different phases, then asserts all handlers are retrievable
+    and the registry accurately lists all registered phases, ensuring robustness under simulated load.
     """
     registry = PhaseHandlerRegistry()
 
@@ -300,10 +339,10 @@ def test_phase_handler_registry_thread_safety_simulation() -> None:
 
 
 def test_phase_handler_registry_error_handling() -> None:
-    """Test registry error handling for invalid inputs.
-
-    Validates registry robustness and proper error reporting.
-    Tests defensive programming practices.
+    """
+    Tests the registry's behavior when registering and retrieving an invalid handler class.
+    
+    Ensures that the registry either prevents registration of non-PhaseHandler classes or raises appropriate errors when such handlers are used, validating defensive programming and error reporting.
     """
     registry = PhaseHandlerRegistry()
 

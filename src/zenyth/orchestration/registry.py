@@ -18,39 +18,38 @@ class PhaseHandlerRegistry:
     """
 
     def __init__(self) -> None:
-        """Initialize empty phase handler registry."""
+        """
+        Initializes an empty registry for phase handlers.
+        """
         self._handlers: dict[SPARCPhase, tuple[Any, str]] = {}
 
     def register(
         self, phase: SPARCPhase, handler_class: type[PhaseHandler] | Any, name: str = ""
     ) -> None:
-        """Register a phase handler for given phase.
-
+        """
+        Registers a handler implementation or factory for a specific orchestration phase.
+        
         Args:
-            phase: SPARC phase enum value
-            handler_class: PhaseHandler implementation class or callable factory
-            name: Optional name for the handler
+            phase: The SPARCPhase enum value representing the orchestration phase.
+            handler_class: The PhaseHandler subclass or a callable factory that produces a PhaseHandler instance.
+            name: An optional name to associate with the handler.
         """
         self._handlers[phase] = (handler_class, name)
 
     def get_handler(self, phase: SPARCPhase) -> PhaseHandler:
-        """Get handler instance for given phase.
-
-        SOLID Principles Alignment:
-            - Single Responsibility: Focused solely on handler instantiation
-            - Open/Closed: Closed for modification, extensible via registration
-            - Liskov Substitution: Returns handlers honoring PhaseHandler contract
-            - Interface Segregation: Minimal focused interface for handler creation
-            - Dependency Inversion: Returns abstractions, not concrete implementations
-
+        """
+        Retrieves an instance of the handler registered for the specified SPARC phase.
+        
+        Attempts to instantiate the handler using a registered factory function, with a provided name, with the phase value, or with no arguments, in that order. Raises a ValueError if no handler is registered or if instantiation fails.
+        
         Args:
-            phase: SPARC phase enum value
-
+            phase: The SPARCPhase enum value for which to retrieve the handler.
+        
         Returns:
-            PhaseHandler instance for the phase
-
+            An instance of PhaseHandler associated with the given phase.
+        
         Raises:
-            ValueError: If no handler registered for phase
+            ValueError: If no handler is registered for the phase or if instantiation fails.
         """
         if phase not in self._handlers:
             raise ValueError(f"No handler registered for phase: {phase}")  # noqa: TRY003
@@ -78,9 +77,10 @@ class PhaseHandlerRegistry:
                 raise ValueError(msg) from e
 
     def list_phases(self) -> list[SPARCPhase]:
-        """List all registered phases.
-
+        """
+        Returns a list of all phases that have registered handlers.
+        
         Returns:
-            List of registered SPARCPhase values
+            A list of SPARCPhase values for which handlers are registered.
         """
         return list(self._handlers.keys())

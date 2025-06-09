@@ -82,10 +82,10 @@ def test_sparc_orchestrator_has_execute_method() -> None:
 
 @pytest.mark.asyncio()
 async def test_sparc_orchestrator_execute_signature() -> None:
-    """Test that execute method has correct parameter signature.
-
-    Validates interface contract for orchestration execution following
-    Interface Segregation Principle - clean, focused method signatures.
+    """
+    Verifies that the SPARCOrchestrator's execute method accepts a task string and returns a result object.
+    
+    Ensures the method signature matches the expected interface for workflow execution.
     """
     # Provide valid mock dependencies for successful execution
     orchestrator = SPARCOrchestrator(
@@ -100,10 +100,9 @@ async def test_sparc_orchestrator_execute_signature() -> None:
 
 
 def test_sparc_orchestrator_dependency_injection() -> None:
-    """Test that orchestrator properly stores injected dependencies.
-
-    Validates Dependency Inversion Principle implementation - high-level
-    orchestration logic depends on abstractions, not concretions.
+    """Verifies that SPARCOrchestrator correctly stores injected dependencies.
+    
+    Ensures that the orchestrator instance retains references to the provided LLM provider, tool registry, and state manager, supporting dependency inversion.
     """
     mock_llm = "mock_llm_provider"
     mock_tools = "mock_tool_registry"
@@ -120,10 +119,10 @@ def test_sparc_orchestrator_dependency_injection() -> None:
 
 
 def test_sparc_orchestrator_follows_solid_principles() -> None:
-    """Test that orchestrator class follows SOLID design principles.
-
-    Validates that the orchestrator implementation adheres to all five
-    SOLID principles for maintainable, extensible architecture.
+    """
+    Verifies that the SPARCOrchestrator class adheres to SOLID design principles.
+    
+    Ensures the orchestrator exposes only orchestration-related methods and does not implement logic for phases, tool management, or LLM communication, maintaining clear separation of concerns.
     """
     # Create mock dependencies for testing
 

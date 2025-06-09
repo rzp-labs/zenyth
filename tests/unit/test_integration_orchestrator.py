@@ -29,11 +29,22 @@ class MockLLMProvider(LLMInterface):
     """
 
     def __init__(self, responses: list[str] | None = None):
+        """
+        Initializes the mock LLM provider with optional predefined responses.
+        
+        Args:
+            responses: A list of responses to return for each generate call. If not provided, defaults to a single mock response.
+        """
         self.responses = responses or ["Mock LLM response"]
         self.call_count = 0
         self.prompts_received = []
 
     async def generate(self, prompt: str, **kwargs) -> str:
+        """
+        Returns a predefined mock response for a given prompt and records the prompt.
+        
+        The response cycles through the list of predefined responses with each call.
+        """
         self.prompts_received.append(prompt)
         response = self.responses[self.call_count % len(self.responses)]
         self.call_count += 1
@@ -47,6 +58,9 @@ class MockToolRegistry:
     """
 
     def __init__(self):
+        """
+        Initializes the mock tool registry with predefined tools for each SPARC phase.
+        """
         self.tools_by_phase = {
             SPARCPhase.SPECIFICATION: ["spec_tool1", "spec_tool2"],
             SPARCPhase.ARCHITECTURE: ["arch_tool1", "design_tool"],
@@ -54,6 +68,15 @@ class MockToolRegistry:
         }
 
     def get_for_phase(self, phase: SPARCPhase) -> list[str]:
+        """
+        Returns the list of tool names associated with the specified SPARC phase.
+        
+        Args:
+            phase: The SPARCPhase for which to retrieve tool names.
+        
+        Returns:
+            A list of tool names registered for the given phase, or an empty list if none are found.
+        """
         return self.tools_by_phase.get(phase, [])
 
 
@@ -64,15 +87,32 @@ class MockStateManager:
     """
 
     def __init__(self):
+        """
+        Initializes the mock state manager with in-memory session storage and call tracking.
+        """
         self.sessions = {}
         self.save_calls = []
         self.load_calls = []
 
     async def save_session(self, session: SessionContext) -> None:
+        """
+        Asynchronously saves a session context in memory for later retrieval.
+        
+        Records the session ID in the save call log and stores the session in the internal session dictionary.
+        """
         self.save_calls.append(session.session_id)
         self.sessions[session.session_id] = session
 
     async def load_session(self, session_id: str) -> SessionContext:
+        """
+        Retrieves a saved session context by its session ID.
+        
+        Args:
+            session_id: The unique identifier of the session to load.
+        
+        Returns:
+            The SessionContext associated with the given session ID, or None if not found.
+        """
         self.load_calls.append(session_id)
         return self.sessions.get(session_id)
 
@@ -84,6 +124,13 @@ class TestPhaseHandler(PhaseHandler):
     """
 
     def __init__(self, phase_name: str, should_fail: bool = False):
+        """
+        Initializes a test phase handler with a phase name and optional failure behavior.
+        
+        Args:
+            phase_name: The name of the phase this handler represents.
+            should_fail: If True, the handler will raise an exception during execution.
+        """
         self.phase_name = phase_name
         self.should_fail = should_fail
         self.execute_called = False
@@ -91,6 +138,20 @@ class TestPhaseHandler(PhaseHandler):
         self.context_received = None
 
     async def execute(self, context: PhaseContext) -> PhaseResult:
+        """
+        Executes the test phase handler, optionally simulating a failure.
+        
+        Marks the handler as executed, records the received context, and either raises an error if configured to fail or returns a PhaseResult with artifacts, the next phase, and metadata.
+        	
+        Args:
+        	context: The phase execution context containing session and workflow information.
+        
+        Returns:
+        	A PhaseResult with artifacts, next phase, and metadata, unless an intentional failure is triggered.
+        
+        Raises:
+        	RuntimeError: If the handler is configured to simulate a failure.
+        """
         self.execute_called = True
         self.context_received = context
 
@@ -105,15 +166,22 @@ class TestPhaseHandler(PhaseHandler):
         )
 
     def validate_prerequisites(self, context: PhaseContext) -> bool:
+        """
+        Checks if the phase prerequisites are met based on the provided context.
+        
+        Returns True if the task description in the context is non-empty; otherwise, returns False.
+        """
         self.validate_called = True
         return context.task_description is not None and len(context.task_description.strip()) > 0
 
 
 @pytest.fixture()
 def mock_dependencies():
-    """Create mock dependencies for orchestrator testing.
-
-    Follows Dependency Inversion Principle by providing abstract dependencies.
+    """
+    Creates and returns mock LLM provider, tool registry, and state manager instances for orchestrator testing.
+    
+    Returns:
+        Tuple containing a mock LLM provider, tool registry, and state manager.
     """
     llm_provider = MockLLMProvider(["Spec response", "Arch response", "Completion response"])
     tool_registry = MockToolRegistry()
@@ -123,9 +191,10 @@ def mock_dependencies():
 
 @pytest.fixture()
 def orchestrator_with_mocks(mock_dependencies):
-    """Create orchestrator with mock dependencies for testing.
-
-    Validates dependency injection pattern in orchestrator construction.
+    """
+    Creates a SPARCOrchestrator instance using mock dependencies for testing purposes.
+    
+    This fixture provides an orchestrator configured with mock LLM provider, tool registry, and state manager to facilitate integration tests.
     """
     llm_provider, tool_registry, state_manager = mock_dependencies
     return SPARCOrchestrator(
@@ -183,10 +252,10 @@ async def test_sparc_orchestrator_execute_returns_workflow_result(orchestrator_w
 
 @pytest.mark.asyncio()
 async def test_sparc_orchestrator_execute_with_phase_registry(orchestrator_with_mocks):
-    """Test orchestrator execution with phase handler registry.
-
-    Validates Open/Closed Principle - orchestrator extensible via registry.
-    Tests integration between orchestrator and phase registry.
+    """
+    Tests that the orchestrator can execute phases using a phase handler registry.
+    
+    Verifies that the orchestrator is extensible via a registry, supporting integration with custom phase handlers and adhering to the Open/Closed Principle.
     """
     # Set up phase registry with test handlers
     registry = PhaseHandlerRegistry()
@@ -206,10 +275,10 @@ async def test_sparc_orchestrator_execute_with_phase_registry(orchestrator_with_
 
 @pytest.mark.asyncio()
 async def test_sparc_orchestrator_sequential_phase_execution() -> None:
-    """Test orchestrator executes phases sequentially with context passing.
-
-    Validates workflow coordination and context preservation between phases.
-    Tests that phase results are properly passed to subsequent phases.
+    """
+    Tests that the orchestrator executes multiple phases sequentially, passing context and accumulated artifacts between phases.
+    
+    Verifies that each phase handler is called in order, receives the correct context, and that artifacts produced by earlier phases are available to subsequent phases.
     """
     # Create orchestrator with real phase registry
     llm_provider = MockLLMProvider()
@@ -254,10 +323,8 @@ async def test_sparc_orchestrator_sequential_phase_execution() -> None:
 
 @pytest.mark.asyncio()
 async def test_sparc_orchestrator_artifact_accumulation() -> None:
-    """Test orchestrator accumulates artifacts across phases.
-
-    Validates artifact management and workflow state preservation.
-    Tests that artifacts from each phase are preserved in final result.
+    """
+    Tests that the orchestrator accumulates and preserves artifacts produced by each phase, ensuring all artifacts are present in the final workflow result.
     """
     llm_provider = MockLLMProvider()
     tool_registry = MockToolRegistry()
@@ -283,10 +350,10 @@ async def test_sparc_orchestrator_artifact_accumulation() -> None:
 
 @pytest.mark.asyncio()
 async def test_sparc_orchestrator_error_handling() -> None:
-    """Test orchestrator handles phase execution errors gracefully.
-
-    Validates error handling and graceful degradation.
-    Tests that workflow failures are properly reported.
+    """
+    Tests that the orchestrator gracefully handles errors during phase execution.
+    
+    Verifies that when a phase handler raises an exception, the orchestrator returns a failed WorkflowResult containing error details and information about phases completed prior to the failure.
     """
     llm_provider = MockLLMProvider()
     tool_registry = MockToolRegistry()
@@ -346,10 +413,10 @@ async def test_sparc_orchestrator_prerequisite_validation() -> None:
 
 @pytest.mark.asyncio()
 async def test_sparc_orchestrator_state_management_integration() -> None:
-    """Test orchestrator integrates with state manager for session persistence.
-
-    Validates state management integration and session handling.
-    Tests that workflow state is properly saved and retrievable.
+    """
+    Tests that the orchestrator correctly integrates with the state manager for session persistence.
+    
+    Verifies that workflow state is saved during execution and can be retrieved from the state manager, ensuring session handling works as expected.
     """
     llm_provider = MockLLMProvider()
     tool_registry = MockToolRegistry()

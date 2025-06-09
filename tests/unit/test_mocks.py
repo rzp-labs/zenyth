@@ -52,7 +52,9 @@ async def test_mock_llm_generate_returns_configured_response() -> None:
 
 
 async def test_mock_llm_cycles_through_responses() -> None:
-    """Test that MockLLMProvider cycles through multiple responses."""
+    """
+    Tests that MockLLMProvider returns responses in sequence and loops back to the start after exhausting the list.
+    """
     responses = ["response 1", "response 2", "response 3"]
     provider = MockLLMProvider(responses=responses)
 

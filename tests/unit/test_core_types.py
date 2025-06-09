@@ -76,7 +76,9 @@ def test_phase_result_defaults_next_phase_to_none() -> None:
 
 
 def test_phase_result_stores_metadata_when_provided_updated() -> None:
-    """Test PhaseResult stores metadata field when provided."""
+    """
+    Verifies that PhaseResult correctly stores the metadata field when it is provided during initialization.
+    """
 
     metadata = {"duration": 1.5}
     result = PhaseResult(phase_name="specification", metadata=metadata)
@@ -153,7 +155,9 @@ def test_session_context_stores_artifacts_when_provided() -> None:
 
 
 def test_session_context_defaults_artifacts_to_empty_dict() -> None:
-    """Test SessionContext defaults artifacts to empty dict when not provided."""
+    """
+    Tests that SessionContext sets artifacts to an empty dictionary if not provided.
+    """
 
     context = SessionContext(session_id="test", task="test")
     assert context.artifacts == {}
@@ -183,7 +187,9 @@ def test_session_context_supports_equality_comparison() -> None:
 
 
 def test_session_context_detects_inequality() -> None:
-    """Test SessionContext detects inequality correctly."""
+    """
+    Tests that SessionContext instances with different tasks are not considered equal.
+    """
 
     context1 = SessionContext(session_id="test", task="task1")
     context2 = SessionContext(session_id="test", task="task2")
@@ -209,7 +215,9 @@ def test_phase_result_with_artifacts() -> None:
 
 
 def test_phase_result_with_metadata_detailed() -> None:
-    """Test PhaseResult with metadata."""
+    """
+    Verifies that PhaseResult correctly stores and provides access to detailed metadata.
+    """
 
     metadata = {"duration": 1.5, "tokens_used": 150}
     result = PhaseResult(phase_name="specification", metadata=metadata)

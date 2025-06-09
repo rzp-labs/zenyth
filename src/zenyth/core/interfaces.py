@@ -126,75 +126,10 @@ class LLMInterface(Protocol):
     """
 
     async def generate(self, prompt: str, **kwargs: Any) -> str:
-        """Generate text response from the given prompt.
-
-        Asynchronously processes the input prompt using the underlying LLM service
-        and returns the generated text response. This method serves as the primary
-        interface for all text generation operations in SPARC phase execution.
-
-        Args:
-            prompt: The input text prompt to process. Should be well-formatted
-                   and contain clear instructions or questions for the LLM.
-                   Maximum length depends on the provider's context window.
-            **kwargs: Additional provider-specific parameters that may include:
-                     - temperature: Randomness control (0.0-2.0 typical range)
-                     - max_tokens: Maximum tokens to generate
-                     - model: Specific model variant to use
-                     - top_p: Nucleus sampling parameter
-                     - frequency_penalty: Repetition penalty
-                     - presence_penalty: Topic penalty
-                     - stop: Stop sequences for generation termination
-                     - timeout: Request timeout in seconds
-
-        Returns:
-            The generated text response as a string. The content and length
-            depend on the prompt, provider capabilities, and configuration
-            parameters. Empty strings are valid responses for certain prompts.
-
-        Raises:
-            The protocol does not specify exact exceptions to allow provider
-            flexibility, but implementations typically raise:
-            - ConnectionError: For network connectivity issues
-            - TimeoutError: For request timeouts
-            - ValueError: For invalid parameters or prompt format
-            - AuthenticationError: For API key or credential issues
-            - RateLimitError: For API rate limit exceeded
-            - ProviderError: For service-specific errors
-
-        Examples:
-            Basic text generation::
-
-                llm = SomeLLMProvider()
-                response = await llm.generate("Explain quantum computing")
-                print(response)
-
-            With provider-specific parameters::
-
-                response = await llm.generate(
-                    "Write a Python function to sort a list",
-                    temperature=0.2,
-                    max_tokens=500,
-                    model="gpt-4-turbo"
-                )
-
-            Error handling::
-
-                try:
-                    response = await llm.generate(prompt, timeout=30)
-                except TimeoutError:
-                    response = "Generation timed out, please try again"
-                except Exception as e:
-                    logger.error(f"LLM generation failed: {e}")
-                    response = "Error occurred during generation"
-
-        Note:
-            Implementations should be thread-safe and support concurrent calls
-            where the underlying service allows. Response times can vary significantly
-            based on prompt complexity, model size, and service load.
-
-            For homelab deployments, implementations should include appropriate
-            retry logic and fallback strategies to handle temporary service
-            unavailability or network issues.
+        """
+        Asynchronously generates a text response from the given prompt using an LLM provider.
+        
+        This method serves as the primary interface for text generation during SPARC phase execution. It accepts a prompt and optional provider-specific parameters, returning the generated text as a string. The response may be empty depending on the prompt and provider behavior.
         """
         ...
 
@@ -257,48 +192,16 @@ class IToolRegistry(Protocol):
     """
 
     def get_for_phase(self, phase: SPARCPhase) -> list[Any]:
-        """Retrieve tools appropriate for the specified SPARC phase.
-
-        Provides phase-specific tool filtering to ensure each phase has access
-        only to appropriate tools based on security requirements and functionality
-        needs. Critical for maintaining isolation and preventing unauthorized
-        operations in orchestrated workflows.
-
+        """
+        Returns a list of tools appropriate for the given SPARC phase.
+        
+        Filters and provides only those tools permitted for the specified phase, supporting security and functional isolation in orchestrated workflows. Returns an empty list if no tools are available for the phase.
+        
         Args:
-            phase: The SPARC phase for which to retrieve tools. Different phases
-                  require different tool sets - specification might need read-only
-                  tools, while completion might need write and execute permissions.
-
+            phase: The SPARC phase for which to retrieve tools.
+        
         Returns:
-            List of tool objects or identifiers appropriate for the specified phase.
-            Empty list if no tools are available for the phase. Tool objects can
-            be any type depending on the implementation (MCP tools, function objects,
-            service clients, etc.).
-
-        Examples:
-            Getting specification phase tools::
-
-                tools = registry.get_for_phase(SPARCPhase.SPECIFICATION)
-                # Returns: [read_file_tool, search_tool, analyze_tool]
-
-            Getting completion phase tools::
-
-                tools = registry.get_for_phase(SPARCPhase.COMPLETION)
-                # Returns: [read_tool, write_tool, execute_tool, build_tool]
-
-            Handling unknown phases::
-
-                tools = registry.get_for_phase(SPARCPhase.CUSTOM_PHASE)
-                # Returns: [] (empty list for unknown phases)
-
-        Note:
-            Implementations should return consistent tool sets for the same phase
-            to ensure predictable workflow execution. Tool availability may vary
-            based on environment configuration and security policies.
-
-            For homelab environments, implementations should handle tool
-            unavailability gracefully and provide appropriate fallbacks or
-            clear error reporting when required tools are missing.
+            A list of tool objects or identifiers suitable for the specified phase. The list is empty if no tools are available.
         """
         ...
 
@@ -369,98 +272,23 @@ class IStateManager(Protocol):
     """
 
     async def save_session(self, session: SessionContext) -> None:
-        """Persist session state for later retrieval and recovery.
-
-        Stores complete session context including task description, artifacts,
-        and metadata to enable workflow resumption, debugging, and audit trails.
-        Critical for reliability in long-running orchestration workflows.
-
-        Args:
-            session: Complete session context to persist. Should contain all
-                    information needed to resume or analyze the workflow state
-                    including task description, accumulated artifacts, and
-                    execution metadata.
-
-        Raises:
-            StorageError: If session cannot be saved due to storage issues
-            ValidationError: If session data is invalid or incomplete
-            PermissionError: If insufficient permissions for storage operation
-
-        Examples:
-            Saving workflow session::
-
-                session = SessionContext(
-                    session_id="sparc-auth-20240101",
-                    task="Implement authentication system",
-                    artifacts={"specification": "..."},
-                    metadata={"start_time": "2024-01-01T10:00:00Z"}
-                )
-                await state_manager.save_session(session)
-
-            Error handling::
-
-                try:
-                    await state_manager.save_session(session)
-                except StorageError as e:
-                    logger.error(f"Failed to save session: {e}")
-                    # Implement fallback strategy
-
-        Note:
-            Implementations should handle concurrent save operations gracefully
-            and ensure data consistency. Session data should be serializable
-            for storage in various backends (files, databases, cloud storage).
-
-            For homelab environments, implementations should include appropriate
-            backup strategies and recovery mechanisms to prevent data loss.
+        """
+        Persists the complete session context for workflow recovery and auditability.
+        
+        Stores all relevant session data, including task details, artifacts, and metadata, to support workflow resumption and debugging in orchestration systems. Implementations should ensure data consistency and handle concurrent saves appropriately.
         """
         ...
 
     async def load_session(self, session_id: str) -> SessionContext:
-        """Retrieve previously saved session state by identifier.
-
-        Loads complete session context to enable workflow resumption, analysis,
-        or debugging. Critical for recovering from interruptions and providing
-        comprehensive audit trails for orchestrated workflows.
-
+        """
+        Loads a previously saved session context by its unique identifier.
+        
+        Retrieves the complete session state, including task, artifacts, and metadata, to enable workflow resumption, analysis, or debugging. Implementations should ensure data integrity and provide clear error messages if loading fails.
+        
         Args:
-            session_id: Unique identifier for the session to retrieve. Should
-                       correspond to a previously saved session identifier.
-
+            session_id: The unique identifier of the session to load.
+        
         Returns:
-            Complete SessionContext with task, artifacts, and metadata as they
-            were when the session was saved. All data should be restored exactly
-            to enable proper workflow resumption.
-
-        Raises:
-            SessionNotFoundError: If session_id does not exist in storage
-            StorageError: If session cannot be loaded due to storage issues
-            CorruptionError: If stored session data is corrupted or invalid
-            PermissionError: If insufficient permissions for read operation
-
-        Examples:
-            Loading existing session::
-
-                session = await state_manager.load_session("sparc-auth-20240101")
-                print(f"Task: {session.task}")
-                print(f"Artifacts: {session.artifacts}")
-
-            Error handling::
-
-                try:
-                    session = await state_manager.load_session(session_id)
-                except SessionNotFoundError:
-                    # Handle missing session
-                    session = create_new_session()
-                except CorruptionError as e:
-                    logger.error(f"Session data corrupted: {e}")
-                    # Implement recovery strategy
-
-        Note:
-            Implementations should validate loaded data integrity and provide
-            clear error messages for debugging. Session loading should be
-            fast enough for interactive use in orchestration workflows.
-
-            For homelab environments, implementations should include appropriate
-            caching strategies and handle storage backend unavailability gracefully.
+            The restored SessionContext as it was when saved.
         """
         ...
