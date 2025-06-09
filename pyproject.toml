@@ -325,8 +325,7 @@ markers = [
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 # Timeout configuration
-timeout = 30
-timeout_method = "thread"
+
 filterwarnings = [
     "error",
     "ignore::UserWarning",
@@ -350,7 +349,7 @@ skips = ["*/test_*.py", "*/conftest.py", "tests/*"]
 [tool.coverage.run]
 source = ["src"]
 branch = true
-contexts = ["phase-*", "integration-*"]
+
 omit = [
     "*/tests/*",
     "*/__init__.py",
