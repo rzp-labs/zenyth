@@ -40,6 +40,14 @@ Examples:
 
 from typing import Any, Protocol, runtime_checkable
 
+from zenyth.core.exceptions import (  # noqa: F401
+    CorruptionError,
+    SessionNotFoundError,
+    StorageError,
+    ValidationError,
+)
+from zenyth.core.types import SessionContext, SPARCPhase
+
 
 @runtime_checkable
 class LLMInterface(Protocol):
@@ -193,5 +201,272 @@ class LLMInterface(Protocol):
             For homelab deployments, implementations should include appropriate
             retry logic and fallback strategies to handle temporary service
             unavailability or network issues.
+        """
+        ...
+
+
+@runtime_checkable
+class IToolRegistry(Protocol):
+    """Protocol for tool registry abstraction in SPARC orchestration.
+
+    Defines the contract for managing and providing tools based on SPARC phases.
+    Following Interface Segregation Principle (ISP) with minimal, focused interface
+    for tool management without coupling to other orchestration concerns.
+
+    This protocol enables dependency inversion where high-level orchestration logic
+    depends on this abstraction rather than concrete tool registry implementations.
+    Critical for testing, provider swapping, and phase-based tool filtering in
+    homelab environments with varying tool availability.
+
+    SOLID Principles Alignment:
+        - Single Responsibility: Focused solely on tool provision for phases
+        - Open/Closed: Closed for modification, open for implementation
+        - Liskov Substitution: All implementations must honor exact contract
+        - Interface Segregation: Minimal tool-focused interface
+        - Dependency Inversion: Enables abstraction-based dependencies
+
+    Methods:
+        get_for_phase: Retrieve tools appropriate for a specific SPARC phase.
+                      Supports phase-based filtering for security and functionality.
+
+    Examples:
+        Implementing for MCP tool registry::
+
+            class MCPToolRegistry:
+                def __init__(self, mcp_client):
+                    self.mcp_client = mcp_client
+                    self.phase_tools = {
+                        SPARCPhase.SPECIFICATION: ["read_file", "search"],
+                        SPARCPhase.ARCHITECTURE: ["read_file", "create_diagram"],
+                        SPARCPhase.COMPLETION: ["read_file", "write_file", "execute"]
+                    }
+
+                def get_for_phase(self, phase: SPARCPhase) -> list[Any]:
+                    tool_names = self.phase_tools.get(phase, [])
+                    return [self.mcp_client.get_tool(name) for name in tool_names]
+
+        Implementing for testing::
+
+            class MockToolRegistry:
+                def get_for_phase(self, phase: SPARCPhase) -> list[Any]:
+                    return [f"mock_tool_for_{phase.value}"]
+
+        Using in orchestration::
+
+            class SPARCOrchestrator:
+                def __init__(self, tool_registry: IToolRegistry):
+                    self.tools = tool_registry
+
+                async def execute_phase(self, phase: SPARCPhase):
+                    phase_tools = self.tools.get_for_phase(phase)
+                    # Use phase-appropriate tools
+    """
+
+    def get_for_phase(self, phase: SPARCPhase) -> list[Any]:
+        """Retrieve tools appropriate for the specified SPARC phase.
+
+        Provides phase-specific tool filtering to ensure each phase has access
+        only to appropriate tools based on security requirements and functionality
+        needs. Critical for maintaining isolation and preventing unauthorized
+        operations in orchestrated workflows.
+
+        Args:
+            phase: The SPARC phase for which to retrieve tools. Different phases
+                  require different tool sets - specification might need read-only
+                  tools, while completion might need write and execute permissions.
+
+        Returns:
+            List of tool objects or identifiers appropriate for the specified phase.
+            Empty list if no tools are available for the phase. Tool objects can
+            be any type depending on the implementation (MCP tools, function objects,
+            service clients, etc.).
+
+        Examples:
+            Getting specification phase tools::
+
+                tools = registry.get_for_phase(SPARCPhase.SPECIFICATION)
+                # Returns: [read_file_tool, search_tool, analyze_tool]
+
+            Getting completion phase tools::
+
+                tools = registry.get_for_phase(SPARCPhase.COMPLETION)
+                # Returns: [read_tool, write_tool, execute_tool, build_tool]
+
+            Handling unknown phases::
+
+                tools = registry.get_for_phase(SPARCPhase.CUSTOM_PHASE)
+                # Returns: [] (empty list for unknown phases)
+
+        Note:
+            Implementations should return consistent tool sets for the same phase
+            to ensure predictable workflow execution. Tool availability may vary
+            based on environment configuration and security policies.
+
+            For homelab environments, implementations should handle tool
+            unavailability gracefully and provide appropriate fallbacks or
+            clear error reporting when required tools are missing.
+        """
+        ...
+
+
+@runtime_checkable
+class IStateManager(Protocol):
+    """Protocol for session state management in SPARC orchestration.
+
+    Defines the contract for persisting and retrieving workflow session state
+    across phase transitions and system restarts. Following Interface Segregation
+    Principle (ISP) with focused responsibility for state operations only.
+
+    This protocol enables dependency inversion where orchestration logic depends
+    on this abstraction rather than concrete state storage implementations.
+    Critical for workflow resumption, debugging, and audit trails in homelab
+    environments where reliability and transparency are essential.
+
+    SOLID Principles Alignment:
+        - Single Responsibility: Focused solely on session state persistence
+        - Open/Closed: Closed for modification, open for implementation
+        - Liskov Substitution: All implementations must honor async contracts
+        - Interface Segregation: Minimal state-focused interface
+        - Dependency Inversion: Enables abstraction-based dependencies
+
+    Methods:
+        save_session: Persist session state for later retrieval and recovery.
+        load_session: Retrieve previously saved session state by identifier.
+
+    Examples:
+        Implementing for file-based storage::
+
+            class FileStateManager:
+                def __init__(self, storage_dir: Path):
+                    self.storage_dir = storage_dir
+
+                async def save_session(self, session: SessionContext) -> None:
+                    session_file = self.storage_dir / f"{session.session_id}.json"
+                    with open(session_file, 'w') as f:
+                        json.dump(asdict(session), f, indent=2)
+
+                async def load_session(self, session_id: str) -> SessionContext:
+                    session_file = self.storage_dir / f"{session_id}.json"
+                    with open(session_file, 'r') as f:
+                        data = json.load(f)
+                    return SessionContext(**data)
+
+        Implementing for database storage::
+
+            class DatabaseStateManager:
+                async def save_session(self, session: SessionContext) -> None:
+                    await self.db.sessions.upsert({
+                        "session_id": session.session_id,
+                        "task": session.task,
+                        "artifacts": json.dumps(session.artifacts),
+                        "metadata": json.dumps(session.metadata)
+                    })
+
+        Using in orchestration::
+
+            class SPARCOrchestrator:
+                def __init__(self, state_manager: IStateManager):
+                    self.state = state_manager
+
+                async def execute(self, task: str):
+                    session = SessionContext(...)
+                    await self.state.save_session(session)
+                    # Continue workflow...
+    """
+
+    async def save_session(self, session: SessionContext) -> None:
+        """Persist session state for later retrieval and recovery.
+
+        Stores complete session context including task description, artifacts,
+        and metadata to enable workflow resumption, debugging, and audit trails.
+        Critical for reliability in long-running orchestration workflows.
+
+        Args:
+            session: Complete session context to persist. Should contain all
+                    information needed to resume or analyze the workflow state
+                    including task description, accumulated artifacts, and
+                    execution metadata.
+
+        Raises:
+            StorageError: If session cannot be saved due to storage issues
+            ValidationError: If session data is invalid or incomplete
+            PermissionError: If insufficient permissions for storage operation
+
+        Examples:
+            Saving workflow session::
+
+                session = SessionContext(
+                    session_id="sparc-auth-20240101",
+                    task="Implement authentication system",
+                    artifacts={"specification": "..."},
+                    metadata={"start_time": "2024-01-01T10:00:00Z"}
+                )
+                await state_manager.save_session(session)
+
+            Error handling::
+
+                try:
+                    await state_manager.save_session(session)
+                except StorageError as e:
+                    logger.error(f"Failed to save session: {e}")
+                    # Implement fallback strategy
+
+        Note:
+            Implementations should handle concurrent save operations gracefully
+            and ensure data consistency. Session data should be serializable
+            for storage in various backends (files, databases, cloud storage).
+
+            For homelab environments, implementations should include appropriate
+            backup strategies and recovery mechanisms to prevent data loss.
+        """
+        ...
+
+    async def load_session(self, session_id: str) -> SessionContext:
+        """Retrieve previously saved session state by identifier.
+
+        Loads complete session context to enable workflow resumption, analysis,
+        or debugging. Critical for recovering from interruptions and providing
+        comprehensive audit trails for orchestrated workflows.
+
+        Args:
+            session_id: Unique identifier for the session to retrieve. Should
+                       correspond to a previously saved session identifier.
+
+        Returns:
+            Complete SessionContext with task, artifacts, and metadata as they
+            were when the session was saved. All data should be restored exactly
+            to enable proper workflow resumption.
+
+        Raises:
+            SessionNotFoundError: If session_id does not exist in storage
+            StorageError: If session cannot be loaded due to storage issues
+            CorruptionError: If stored session data is corrupted or invalid
+            PermissionError: If insufficient permissions for read operation
+
+        Examples:
+            Loading existing session::
+
+                session = await state_manager.load_session("sparc-auth-20240101")
+                print(f"Task: {session.task}")
+                print(f"Artifacts: {session.artifacts}")
+
+            Error handling::
+
+                try:
+                    session = await state_manager.load_session(session_id)
+                except SessionNotFoundError:
+                    # Handle missing session
+                    session = create_new_session()
+                except CorruptionError as e:
+                    logger.error(f"Session data corrupted: {e}")
+                    # Implement recovery strategy
+
+        Note:
+            Implementations should validate loaded data integrity and provide
+            clear error messages for debugging. Session loading should be
+            fast enough for interactive use in orchestration workflows.
+
+            For homelab environments, implementations should include appropriate
+            caching strategies and handle storage backend unavailability gracefully.
         """
         ...

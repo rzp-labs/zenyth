@@ -28,13 +28,14 @@ Examples:
 """
 
 import inspect
+from unittest.mock import Mock
 
 import pytest
 
 from zenyth.orchestration import SPARCOrchestrator
 
 
-def test_sparc_orchestrator_exists():
+def test_sparc_orchestrator_exists() -> None:
     """Test that SPARCOrchestrator class can be instantiated with dependencies.
 
     This test should FAIL initially (RED phase) - driving TDD implementation.
@@ -56,13 +57,20 @@ def test_sparc_orchestrator_exists():
     assert orchestrator.state_manager == mock_state_manager
 
 
-def test_sparc_orchestrator_has_execute_method():
+def test_sparc_orchestrator_has_execute_method() -> None:
     """Test that SPARCOrchestrator has async execute method with correct signature.
 
     Validates the main orchestration interface following Single Responsibility
     Principle - orchestrator's sole responsibility is workflow execution.
     """
-    orchestrator = SPARCOrchestrator(llm_provider=None, tool_registry=None, state_manager=None)
+    # Create mock dependencies for testing
+
+    mock_llm = Mock()
+    mock_tools = Mock()
+    mock_state = Mock()
+    orchestrator = SPARCOrchestrator(
+        llm_provider=mock_llm, tool_registry=mock_tools, state_manager=mock_state
+    )
 
     # Should have async execute method that accepts task and returns result
     assert hasattr(orchestrator, "execute")
@@ -73,7 +81,7 @@ def test_sparc_orchestrator_has_execute_method():
 
 
 @pytest.mark.asyncio()
-async def test_sparc_orchestrator_execute_signature():
+async def test_sparc_orchestrator_execute_signature() -> None:
     """Test that execute method has correct parameter signature.
 
     Validates interface contract for orchestration execution following
@@ -91,7 +99,7 @@ async def test_sparc_orchestrator_execute_signature():
     assert result is not None
 
 
-def test_sparc_orchestrator_dependency_injection():
+def test_sparc_orchestrator_dependency_injection() -> None:
     """Test that orchestrator properly stores injected dependencies.
 
     Validates Dependency Inversion Principle implementation - high-level
@@ -111,13 +119,20 @@ def test_sparc_orchestrator_dependency_injection():
     assert orchestrator.state_manager == mock_state
 
 
-def test_sparc_orchestrator_follows_solid_principles():
+def test_sparc_orchestrator_follows_solid_principles() -> None:
     """Test that orchestrator class follows SOLID design principles.
 
     Validates that the orchestrator implementation adheres to all five
     SOLID principles for maintainable, extensible architecture.
     """
-    orchestrator = SPARCOrchestrator(llm_provider=None, tool_registry=None, state_manager=None)
+    # Create mock dependencies for testing
+
+    mock_llm = Mock()
+    mock_tools = Mock()
+    mock_state = Mock()
+    orchestrator = SPARCOrchestrator(
+        llm_provider=mock_llm, tool_registry=mock_tools, state_manager=mock_state
+    )
 
     # Single Responsibility: MUST have execute method for orchestration
     assert hasattr(

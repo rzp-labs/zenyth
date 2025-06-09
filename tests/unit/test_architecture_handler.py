@@ -92,7 +92,7 @@ def architecture_handler(
 
 async def test_architecture_handler_execute_returns_phase_result(
     architecture_handler: ArchitectureHandler, phase_context: PhaseContext
-):
+) -> None:
     """Test that execute returns proper PhaseResult."""
     result = await architecture_handler.execute(phase_context)
 
@@ -130,7 +130,7 @@ async def test_architecture_handler_uses_injected_strategies(
     phase_context: PhaseContext,
     mock_system_designer: SystemDesigner,
     mock_architecture_diagrammer: ArchitectureDiagrammer,
-):
+) -> None:
     """Test that handler uses injected strategy dependencies."""
     await architecture_handler.execute(phase_context)
 
@@ -142,7 +142,7 @@ async def test_architecture_handler_instance_configuration_affects_behavior(
     mock_system_designer: SystemDesigner,
     mock_architecture_diagrammer: ArchitectureDiagrammer,
     phase_context: PhaseContext,
-):
+) -> None:
     """Test that instance configuration meaningfully affects behavior."""
     handler_with_different_config = ArchitectureHandler(
         system_designer=mock_system_designer,
@@ -187,7 +187,7 @@ def phase_context_with_api() -> PhaseContext:
 
 async def test_basic_system_designer_uses_instance_configuration(
     phase_context_with_api: PhaseContext,
-):
+) -> None:
     """Test that designer uses instance configuration meaningfully."""
     # Designer with caching enabled
     designer_with_caching = BasicSystemDesigner(
@@ -212,7 +212,7 @@ async def test_basic_system_designer_uses_instance_configuration(
 
 async def test_basic_system_designer_analyze_identifies_components(
     basic_system_designer: BasicSystemDesigner, phase_context_with_api: PhaseContext
-):
+) -> None:
     """Test that analyzer identifies system components from specification."""
     analysis = await basic_system_designer.analyze(
         phase_context_with_api.task_description, phase_context_with_api.global_artifacts
@@ -245,7 +245,7 @@ def system_analysis() -> dict[str, Any]:
 
 async def test_basic_architecture_diagrammer_uses_instance_configuration(
     system_analysis: dict[str, Any],
-):
+) -> None:
     """Test that diagrammer uses instance configuration meaningfully."""
     # Diagrammer with metadata enabled
     diagrammer_with_metadata = BasicArchitectureDiagrammer(
@@ -271,7 +271,7 @@ async def test_basic_architecture_diagrammer_uses_instance_configuration(
 async def test_basic_architecture_diagrammer_creates_diagram(
     basic_architecture_diagrammer: BasicArchitectureDiagrammer,
     system_analysis: dict[str, Any],
-):
+) -> None:
     """Test that diagrammer creates diagram from analysis."""
     diagram = await basic_architecture_diagrammer.generate(
         "Test task", system_analysis, "session-123"
