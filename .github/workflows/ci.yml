@@ -13,8 +13,8 @@ on:
     - main
 
 jobs:
-  quality-analysis:
-    name: Quality Analysis & Testing
+  ci:
+    name: Continuous Integration
     runs-on: ubuntu-latest
 
     steps:
@@ -47,12 +47,10 @@ jobs:
 
     # ============ FUNDAMENTAL DESIGN VALIDATION ============
     - name: SOLID Principles Validation
-      if: github.event_name == 'pull_request'
       run: |
         uv run python scripts/validate_solid_principles.py
 
     - name: Architecture compliance check
-      if: github.event_name == 'pull_request'
       run: |
         echo "🏗️ Validating architecture compliance..."
         echo "✅ Architecture compliance validated"
@@ -78,12 +76,10 @@ jobs:
     - name: Type check (MyPy)
       run: |
         uv run mypy src/ --no-error-summary
-      continue-on-error: ${{ github.event_name == 'push' }}
 
     - name: Security check (Bandit)
       run: |
         uv run bandit -r src/ -ll
-      continue-on-error: ${{ github.event_name == 'push' }}
 
     # ============ TESTING ============
     - name: Run tests with coverage
@@ -107,28 +103,8 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         SONAR_HOST_URL: https://sonarcloud.io
-    # ============ PUSH-SPECIFIC SECURITY SCAN ============
-  security-analysis:
-    name: Extended Security Analysis
-    runs-on: ubuntu-latest
-    needs: quality-analysis
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
 
-    steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: Install UV and dependencies
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-        uv sync --dev
-
+    # ============ EXTENDED SECURITY ANALYSIS ============
     - name: Extended security checks
       run: |
         # Additional security scanning
