@@ -13,7 +13,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```text
 [SESSION START CHECKLIST]
-□ 1. Import all content from /Users/stephen/Projects/rzp-labs/zenyth/agent/
+□ 1. Import all content from /Users/stephen/Projects/rzp-labs/zenyth/agent/rules
 □ 2. Determine and declare active mode
 □ 3. Initialize ConPort (if database exists):
    □ get_product_context
@@ -43,9 +43,7 @@ Ready to assist with your request.
 
 ### [ALWAYS]
 
-- ALWAYS be direct and technical, NEVER conversational
 - ALWAYS follow [SOLID principles](/Users/stephen/Projects/rzp-labs/zenyth/agent/rules/SOLID_PRINCIPLES.md)
-- ALWAYS follow Test Driven Development
 - ALWAYS consider the impact on other components before making changes
 - ALWAYS check for existing utilities/helpers before creating new ones
 - ALWAYS form your tool use using the XML format specified for each tool
@@ -79,21 +77,6 @@ Ready to assist with your request.
 - Never mention specific ConPort operation names to user
 - Place ALL ConPort MCP tool calls at the very END of response messages
 - Wait for results before proceeding with dependent actions
-
-### Task Planning Workflow
-
-**MUST** use dual-tool approach for task management:
-
-1. **Initial Planning Phase** - Use software-planning-mcp tool:
-   - Create detailed task breakdown with complexity scores
-   - Organize tasks with titles, descriptions, and code examples
-   - Use interactive planning features for task refinement
-
-2. **Persistent Tracking Phase** - Transfer to ConPort:
-   - Create progress entries with parent-child relationships
-   - Include complexity scores in descriptions
-   - Store full metadata in custom_data category "task_metadata"
-   - Link planning sessions via custom_data category "planning_sessions"
 
 ## Project Overview
 

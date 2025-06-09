@@ -263,7 +263,6 @@ warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
-warn_required_dynamic_aliases = true
 warn_return_any = true
 disallow_any_generics = true
 disallow_subclassing_any = true
@@ -327,6 +326,7 @@ asyncio_default_fixture_loop_scope = "function"
 # Timeout configuration
 timeout = 30
 timeout_method = "thread"
+
 filterwarnings = [
     "error",
     "ignore::UserWarning",
@@ -350,7 +350,7 @@ skips = ["*/test_*.py", "*/conftest.py", "tests/*"]
 [tool.coverage.run]
 source = ["src"]
 branch = true
-contexts = ["phase-*", "integration-*"]
+
 omit = [
     "*/tests/*",
     "*/__init__.py",
@@ -418,3 +418,10 @@ include = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/zenyth"]
+
+# Pydantic mypy plugin configuration
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+warn_untyped_fields = true
