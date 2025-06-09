@@ -52,24 +52,21 @@ jobs:
 
     # ============ UPFRONT ANALYSIS ============
     - name: SonarCloud Analysis (Early Static Analysis)
-      uses: SonarSource/sonarcloud-github-action@master
+      uses: SonarSource/sonarqube-scan-action@v5.2.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        args: >
-          -Dsonar.projectKey=rzp-labs_zenyth -Dsonar.organization=rzp-labs -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.sourceEncoding=UTF-8 -Dsonar.language=py -Dsonar.python.version=3.10,3.11,3.12
+        SONAR_HOST_URL: https://sonarcloud.io
 
     # ============ QUALITY GATES ============
-    - name: Format check (Black)
+    - name: Format with Black
       run: |
-        uv run black --check --diff src/ tests/
-      continue-on-error: ${{ github.event_name == 'push' }}
+        uv run black src/ tests/
+        git diff --exit-code || (echo "Code was reformatted by Black. Please commit the changes." && exit 1)
 
-    - name: Lint check (Ruff)
+    - name: Lint with Ruff
       run: |
-        uv run ruff check src/ tests/ --output-format=github
-      continue-on-error: ${{ github.event_name == 'push' }}
+        uv run ruff check --fix src/ tests/ --output-format=github
+        git diff --exit-code || (echo "Code was auto-fixed by Ruff. Please commit the changes." && exit 1)
 
     - name: Type check (MyPy)
       run: |
@@ -99,13 +96,10 @@ jobs:
     # ============ ENHANCED ANALYSIS (with coverage) ============
     - name: SonarCloud Analysis (Coverage Enhanced)
       if: success()
-      uses: SonarSource/sonarcloud-github-action@master
+      uses: SonarSource/sonarqube-scan-action@v5.2.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      with:
-        args: >
-          -Dsonar.projectKey=rzp-labs_zenyth -Dsonar.organization=rzp-labs -Dsonar.python.coverage.reportPaths=coverage.xml -Dsonar.python.xunit.reportPath=pytest-report.xml -Dsonar.sources=src -Dsonar.tests=tests -Dsonar.sourceEncoding=UTF-8 -Dsonar.language=py -Dsonar.python.version=3.10,3.11,3.12
+        SONAR_HOST_URL: https://sonarcloud.io
     # ============ PUSH-SPECIFIC SECURITY SCAN ============
   security-analysis:
     name: Extended Security Analysis

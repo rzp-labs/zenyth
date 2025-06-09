@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
 class SPARCOrchestrator:
     """Main workflow orchestrator for SPARC methodology execution.
-    
+
     Coordinates the execution of SPARC phases (Specification, Pseudocode,
     Architecture, Refinement, Completion, Validation, Integration) while
     maintaining session state and managing tool access per phase.
@@ -90,7 +90,7 @@ class SPARCOrchestrator:
         operation. The orchestrator does not create or manage the lifecycle of
         its dependencies, maintaining clear separation of concerns.
     """
-    
+
     _phase_registry: "PhaseHandlerRegistry | None"
 
     def __init__(self, llm_provider: Any, tool_registry: Any, state_manager: Any) -> None:
@@ -360,8 +360,6 @@ class SPARCOrchestrator:
                                 "error_type": type(phase_error).__name__,
                             },
                         )
-
-
 
             # Create successful workflow result (Open/Closed - extensible through configuration)
             end_time = time.time()
