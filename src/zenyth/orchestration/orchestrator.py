@@ -155,11 +155,70 @@ class SPARCOrchestrator:
         self.llm_provider = llm_provider
         self.tool_registry = tool_registry
         self.state_manager = state_manager
-        self._phase_registry = None
-
         # Initialize phase registry for connecting to phase handlers
         # This will be injected or created based on configuration in future iterations
         self._phase_registry = None
+
+    @staticmethod
+    def _create_session_context(task: str, session_id: str, start_time: float) -> Any:
+        """Create session context for workflow execution.
+
+        Helper method to reduce complexity in main execute method.
+        """
+        return SessionContext(
+            session_id=session_id,
+            task=task,
+            artifacts={},
+            metadata={
+                "start_time": start_time,
+                "orchestrator_version": "1.0",
+                "sparc_methodology": "standard",
+            },
+        )
+
+    @staticmethod
+    def _create_failed_result(task: str, error: str, metadata: dict[str, Any]) -> Any:
+        """Create a failed WorkflowResult.
+
+        Helper method to reduce duplication and complexity.
+        """
+        return WorkflowResult(
+            success=False,
+            task=task,
+            phases_completed=[],
+            artifacts={},
+            error=error,
+            metadata=metadata,
+        )
+
+    @staticmethod
+    def _create_success_result(
+        task: str,
+        phases_completed: list[Any],
+        accumulated_artifacts: dict[str, Any],
+        start_time: float,
+        session_context: Any,
+    ) -> Any:
+        """Create a successful WorkflowResult.
+
+        Helper method to reduce complexity in main execute method.
+        """
+        end_time = time.time()
+        return WorkflowResult(
+            success=True,
+            task=task,
+            phases_completed=phases_completed,
+            artifacts=accumulated_artifacts,
+            metadata={
+                "total_duration": end_time - start_time,
+                "start_time": start_time,
+                "end_time": end_time,
+                "session_id": session_context.session_id,
+                "phases_count": len(phases_completed),
+                "orchestrator_version": "1.0",
+                "completion_status": "full_workflow_completed",
+            },
+        )
 
     async def execute(self, task: str) -> Any:
         """Execute complete SPARC workflow for the given task.
@@ -265,12 +324,8 @@ class SPARCOrchestrator:
         """
         # Validate input following fail-fast principle (Single Responsibility)
         if not task or not task.strip():
-            # Return failed result for empty task instead of raising exception
-            return WorkflowResult(
-                success=False,
+            return self._create_failed_result(
                 task="",
-                phases_completed=[],
-                artifacts={},
                 error="Task description cannot be empty - prerequisite validation failed",
                 metadata={
                     "total_duration": 0.0,
@@ -280,7 +335,7 @@ class SPARCOrchestrator:
                 },
             )
 
-        # Generate unique session ID for tracking and state management
+        # Initialize workflow execution state
         session_id = f"sparc-{int(time.time())}-{str(uuid.uuid4())[:8]}"
         start_time = time.time()
         phases_completed: list[Any] = []
@@ -289,16 +344,7 @@ class SPARCOrchestrator:
 
         try:
             # Create session context for state management (Dependency Inversion)
-            session_context = SessionContext(
-                session_id=session_id,
-                task=task.strip(),
-                artifacts={},
-                metadata={
-                    "start_time": time.time(),
-                    "orchestrator_version": "1.0.0",
-                    "sparc_methodology": True,
-                },
-            )
+            session_context = self._create_session_context(task, session_id, start_time)
 
             # Save initial session state (Single Responsibility - delegate to state manager)
             await self.state_manager.save_session(session_context)
@@ -347,8 +393,8 @@ class SPARCOrchestrator:
                         return WorkflowResult(
                             success=False,
                             task=task.strip(),
-                            phases_completed=phases_completed,
-                            artifacts=accumulated_artifacts,
+                            phases_completed=phases_completed,  # Include successful phases
+                            artifacts=accumulated_artifacts,  # Include accumulated artifacts
                             error=error_message,
                             metadata={
                                 "total_duration": end_time - start_time,

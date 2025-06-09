@@ -40,6 +40,12 @@ Examples:
 
 from typing import Any, Protocol, runtime_checkable
 
+from zenyth.core.exceptions import (  # noqa: F401
+    CorruptionError,
+    SessionNotFoundError,
+    StorageError,
+    ValidationError,
+)
 from zenyth.core.types import SessionContext, SPARCPhase
 
 
