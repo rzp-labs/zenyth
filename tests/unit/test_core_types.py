@@ -1,4 +1,44 @@
-"""Unit tests for core data types."""
+"""Comprehensive unit tests for Zenyth core data types.
+
+This test module validates the behavior, immutability, and contract compliance
+of the fundamental data structures used throughout the Zenyth SPARC orchestration
+system. Each test follows the Single Responsibility Principle (SRP) by testing
+exactly one behavioral aspect of the target classes.
+
+The tests ensure that PhaseResult and SessionContext maintain their contracts
+for immutability, field validation, equality comparison, and string representation.
+These guarantees are critical for reliable orchestration and debugging in
+homelab environments where data integrity and audit trails are essential.
+
+Test Organization:
+    - PhaseResult tests: Validate success/failure result containers
+    - SessionContext tests: Validate session state management
+    - Immutability tests: Ensure frozen dataclass behavior
+    - Equality tests: Verify comparison operations
+    - Representation tests: Check string formatting
+
+Testing Strategy:
+    - Each test validates one specific behavior (SRP compliance)
+    - Tests are independent and can run in any order
+    - Clear test naming describes expected behavior
+    - Comprehensive coverage of all field combinations
+    - Edge cases and boundary conditions included
+
+Examples:
+    Running all core type tests::
+
+        pytest tests/unit/test_core_types.py -v
+
+    Running specific test categories::
+
+        pytest tests/unit/test_core_types.py -k "phase_result" -v
+        pytest tests/unit/test_core_types.py -k "session_context" -v
+        pytest tests/unit/test_core_types.py -k "immutable" -v
+
+    Checking test coverage::
+
+        pytest tests/unit/test_core_types.py --cov=zenyth.core.types
+"""
 
 import pytest
 
