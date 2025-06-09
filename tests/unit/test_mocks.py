@@ -29,20 +29,20 @@ from zenyth.core.interfaces import LLMInterface
 from zenyth.mocks import MockLLMProvider
 
 
-def test_mock_llm_provider_exists():
+def test_mock_llm_provider_exists() -> None:
     """Test that MockLLMProvider class can be instantiated."""
     # This test should FAIL initially - driving TDD red phase
     provider = MockLLMProvider(responses=["test response"])
     assert provider is not None
 
 
-def test_mock_llm_implements_interface():
+def test_mock_llm_implements_interface() -> None:
     """Test that MockLLMProvider implements LLMInterface protocol."""
     provider = MockLLMProvider(responses=["test"])
     assert isinstance(provider, LLMInterface)
 
 
-async def test_mock_llm_generate_returns_configured_response():
+async def test_mock_llm_generate_returns_configured_response() -> None:
     """Test that generate method returns the configured response."""
     expected_response = "Mock generated response"
     provider = MockLLMProvider(responses=[expected_response])
@@ -51,7 +51,7 @@ async def test_mock_llm_generate_returns_configured_response():
     assert result == expected_response
 
 
-async def test_mock_llm_cycles_through_responses():
+async def test_mock_llm_cycles_through_responses() -> None:
     """Test that MockLLMProvider cycles through multiple responses."""
     responses = ["response 1", "response 2", "response 3"]
     provider = MockLLMProvider(responses=responses)
@@ -66,7 +66,7 @@ async def test_mock_llm_cycles_through_responses():
     assert result == responses[0]
 
 
-async def test_mock_llm_tracks_call_count():
+async def test_mock_llm_tracks_call_count() -> None:
     """Test that MockLLMProvider tracks the number of generate calls."""
     provider = MockLLMProvider(responses=["response"])
 
@@ -79,7 +79,7 @@ async def test_mock_llm_tracks_call_count():
     assert provider.call_count == 2
 
 
-async def test_mock_llm_accepts_kwargs():
+async def test_mock_llm_accepts_kwargs() -> None:
     """Test that MockLLMProvider accepts and ignores kwargs like real providers."""
     provider = MockLLMProvider(responses=["response"])
 

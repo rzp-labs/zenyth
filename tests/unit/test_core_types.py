@@ -45,14 +45,14 @@ import pytest
 from zenyth.core.types import PhaseResult, SessionContext
 
 
-def test_phase_result_accepts_phase_name_field():
+def test_phase_result_accepts_phase_name_field() -> None:
     """Test PhaseResult accepts phase_name field."""
 
     result = PhaseResult(phase_name="specification")
     assert result.phase_name == "specification"
 
 
-def test_phase_result_accepts_artifacts_field():
+def test_phase_result_accepts_artifacts_field() -> None:
     """Test PhaseResult accepts artifacts field."""
 
     artifacts = {"document": "test output"}
@@ -60,7 +60,7 @@ def test_phase_result_accepts_artifacts_field():
     assert result.artifacts == artifacts
 
 
-def test_phase_result_stores_metadata_when_provided():
+def test_phase_result_stores_metadata_when_provided() -> None:
     """Test PhaseResult stores metadata field when provided."""
 
     metadata = {"duration": 1.5, "tokens": 100}
@@ -68,14 +68,14 @@ def test_phase_result_stores_metadata_when_provided():
     assert result.metadata == metadata
 
 
-def test_phase_result_defaults_next_phase_to_none():
+def test_phase_result_defaults_next_phase_to_none() -> None:
     """Test PhaseResult defaults next_phase to None when not provided."""
 
     result = PhaseResult(phase_name="specification")
     assert result.next_phase is None
 
 
-def test_phase_result_stores_metadata_when_provided_updated():
+def test_phase_result_stores_metadata_when_provided_updated() -> None:
     """Test PhaseResult stores metadata field when provided."""
 
     metadata = {"duration": 1.5}
@@ -83,14 +83,14 @@ def test_phase_result_stores_metadata_when_provided_updated():
     assert result.metadata == metadata
 
 
-def test_phase_result_defaults_metadata_to_empty_dict():
+def test_phase_result_defaults_metadata_to_empty_dict() -> None:
     """Test PhaseResult defaults metadata to empty dict when not provided."""
 
     result = PhaseResult(phase_name="specification")
     assert result.metadata == {}
 
 
-def test_phase_result_provides_string_representation():
+def test_phase_result_provides_string_representation() -> None:
     """Test PhaseResult provides string representation."""
 
     result = PhaseResult(phase_name="specification")
@@ -98,14 +98,14 @@ def test_phase_result_provides_string_representation():
     assert len(str(result)) > 0
 
 
-def test_phase_result_string_contains_phase_name():
+def test_phase_result_string_contains_phase_name() -> None:
     """Test PhaseResult string representation contains phase name."""
 
     result = PhaseResult(phase_name="specification")
     assert "specification" in str(result)
 
 
-def test_phase_result_supports_equality_comparison():
+def test_phase_result_supports_equality_comparison() -> None:
     """Test PhaseResult supports equality comparison."""
 
     result1 = PhaseResult(phase_name="specification")
@@ -113,7 +113,7 @@ def test_phase_result_supports_equality_comparison():
     assert result1 == result2
 
 
-def test_phase_result_detects_inequality():
+def test_phase_result_detects_inequality() -> None:
     """Test PhaseResult detects inequality correctly."""
 
     result1 = PhaseResult(phase_name="specification")
@@ -121,7 +121,7 @@ def test_phase_result_detects_inequality():
     assert result1 != result2
 
 
-def test_phase_result_prevents_field_modification():
+def test_phase_result_prevents_field_modification() -> None:
     """Test PhaseResult prevents modification of fields after creation."""
 
     result = PhaseResult(phase_name="specification")
@@ -130,21 +130,21 @@ def test_phase_result_prevents_field_modification():
         result.phase_name = "architecture"
 
 
-def test_session_context_accepts_session_id_field():
+def test_session_context_accepts_session_id_field() -> None:
     """Test SessionContext accepts session_id field."""
 
     context = SessionContext(session_id="test-session", task="test")
     assert context.session_id == "test-session"
 
 
-def test_session_context_accepts_task_field():
+def test_session_context_accepts_task_field() -> None:
     """Test SessionContext accepts task field."""
 
     context = SessionContext(session_id="test", task="test task")
     assert context.task == "test task"
 
 
-def test_session_context_stores_artifacts_when_provided():
+def test_session_context_stores_artifacts_when_provided() -> None:
     """Test SessionContext stores artifacts field when provided."""
 
     artifacts = {"spec": "requirement"}
@@ -152,14 +152,14 @@ def test_session_context_stores_artifacts_when_provided():
     assert context.artifacts == artifacts
 
 
-def test_session_context_defaults_artifacts_to_empty_dict():
+def test_session_context_defaults_artifacts_to_empty_dict() -> None:
     """Test SessionContext defaults artifacts to empty dict when not provided."""
 
     context = SessionContext(session_id="test", task="test")
     assert context.artifacts == {}
 
 
-def test_session_context_stores_metadata_when_provided():
+def test_session_context_stores_metadata_when_provided() -> None:
     """Test SessionContext stores metadata field when provided."""
 
     metadata = {"start_time": "2024-01-01"}
@@ -167,14 +167,14 @@ def test_session_context_stores_metadata_when_provided():
     assert context.metadata == metadata
 
 
-def test_session_context_defaults_metadata_to_empty_dict():
+def test_session_context_defaults_metadata_to_empty_dict() -> None:
     """Test SessionContext defaults metadata to empty dict when not provided."""
 
     context = SessionContext(session_id="test", task="test")
     assert context.metadata == {}
 
 
-def test_session_context_supports_equality_comparison():
+def test_session_context_supports_equality_comparison() -> None:
     """Test SessionContext supports equality comparison."""
 
     context1 = SessionContext(session_id="test", task="task1")
@@ -182,7 +182,7 @@ def test_session_context_supports_equality_comparison():
     assert context1 == context2
 
 
-def test_session_context_detects_inequality():
+def test_session_context_detects_inequality() -> None:
     """Test SessionContext detects inequality correctly."""
 
     context1 = SessionContext(session_id="test", task="task1")
@@ -190,7 +190,7 @@ def test_session_context_detects_inequality():
     assert context1 != context2
 
 
-def test_session_context_prevents_field_modification():
+def test_session_context_prevents_field_modification() -> None:
     """Test SessionContext prevents modification of fields after creation."""
 
     context = SessionContext(session_id="test", task="test")
@@ -199,7 +199,7 @@ def test_session_context_prevents_field_modification():
         context.session_id = "modified"
 
 
-def test_phase_result_with_artifacts():
+def test_phase_result_with_artifacts() -> None:
     """Test PhaseResult with artifacts information."""
 
     artifacts = {"document": "Test document content", "metadata": {"status": "complete"}}
@@ -208,7 +208,7 @@ def test_phase_result_with_artifacts():
     assert result.artifacts["document"] == "Test document content"
 
 
-def test_phase_result_with_metadata_detailed():
+def test_phase_result_with_metadata_detailed() -> None:
     """Test PhaseResult with metadata."""
 
     metadata = {"duration": 1.5, "tokens_used": 150}
@@ -217,7 +217,7 @@ def test_phase_result_with_metadata_detailed():
     assert result.metadata["duration"] == 1.5
 
 
-def test_phase_result_optional_fields():
+def test_phase_result_optional_fields() -> None:
     """Test PhaseResult with optional fields."""
 
     result = PhaseResult(phase_name="specification")
@@ -226,7 +226,7 @@ def test_phase_result_optional_fields():
     assert result.artifacts == {}
 
 
-def test_phase_result_str_representation():
+def test_phase_result_str_representation() -> None:
     """Test PhaseResult string representation."""
 
     result = PhaseResult(phase_name="specification", artifacts={"doc": "test output"})
@@ -234,7 +234,7 @@ def test_phase_result_str_representation():
     assert "specification" in str_repr
 
 
-def test_phase_result_equality():
+def test_phase_result_equality() -> None:
     """Test PhaseResult equality comparison."""
 
     result1 = PhaseResult(phase_name="specification", artifacts={"doc": "test"})
@@ -245,7 +245,7 @@ def test_phase_result_equality():
     assert result1 != result3
 
 
-def test_phase_result_immutable():
+def test_phase_result_immutable() -> None:
     """Test that PhaseResult is immutable after creation."""
 
     result = PhaseResult(phase_name="specification")
@@ -255,7 +255,7 @@ def test_phase_result_immutable():
         result.phase_name = "architecture"
 
 
-def test_session_context_initialization():
+def test_session_context_initialization() -> None:
     """Test SessionContext initialization with required fields."""
 
     context = SessionContext(session_id="test-session", task="test task")
@@ -263,7 +263,7 @@ def test_session_context_initialization():
     assert context.task == "test task"
 
 
-def test_session_context_with_artifacts():
+def test_session_context_with_artifacts() -> None:
     """Test SessionContext with artifacts storage."""
 
     artifacts = {"spec": "requirement doc", "code": "implementation"}
@@ -272,7 +272,7 @@ def test_session_context_with_artifacts():
     assert context.artifacts["spec"] == "requirement doc"
 
 
-def test_session_context_with_metadata():
+def test_session_context_with_metadata() -> None:
     """Test SessionContext with metadata."""
 
     metadata = {"start_time": "2024-01-01", "user": "test_user"}
@@ -281,7 +281,7 @@ def test_session_context_with_metadata():
     assert context.metadata["user"] == "test_user"
 
 
-def test_session_context_optional_fields():
+def test_session_context_optional_fields() -> None:
     """Test SessionContext with optional fields."""
 
     context = SessionContext(session_id="test", task="test")
@@ -289,7 +289,7 @@ def test_session_context_optional_fields():
     assert context.metadata == {}
 
 
-def test_session_context_immutable():
+def test_session_context_immutable() -> None:
     """Test that SessionContext is immutable after creation."""
 
     context = SessionContext(session_id="test", task="test")
@@ -299,7 +299,7 @@ def test_session_context_immutable():
         context.session_id = "modified"
 
 
-def test_session_context_equality():
+def test_session_context_equality() -> None:
     """Test SessionContext equality comparison."""
 
     context1 = SessionContext(session_id="test", task="task1")
