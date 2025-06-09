@@ -19,7 +19,7 @@ Examples:
     Implementing a concrete LLM provider::
 
         class ClaudeProvider:
-            async def generate(self, prompt: str, **kwargs) -> str:
+            async def generate(self, prompt: str, **kwargs: Any) -> str:
                 # Claude-specific implementation
                 response = await self.claude_client.complete(prompt, **kwargs)
                 return response.content
@@ -38,7 +38,7 @@ Examples:
             result = await provider.generate("Hello")
 """
 
-from typing import Protocol, runtime_checkable
+from typing import Any, Protocol, runtime_checkable
 
 
 @runtime_checkable
@@ -72,7 +72,7 @@ class LLMInterface(Protocol):
                     self.client = openai.AsyncOpenAI(api_key=api_key)
                     self.model = model
 
-                async def generate(self, prompt: str, **kwargs) -> str:
+                async def generate(self, prompt: str, **kwargs: Any) -> str:
                     response = await self.client.chat.completions.create(
                         model=kwargs.get("model", self.model),
                         messages=[{"role": "user", "content": prompt}],
@@ -88,7 +88,7 @@ class LLMInterface(Protocol):
                     self.base_url = base_url
                     self.model = model
 
-                async def generate(self, prompt: str, **kwargs) -> str:
+                async def generate(self, prompt: str, **kwargs: Any) -> str:
                     async with aiohttp.ClientSession() as session:
                         payload = {
                             "model": kwargs.get("model", self.model),
@@ -107,7 +107,7 @@ class LLMInterface(Protocol):
                     self.responses = responses
                     self.call_count = 0
 
-                async def generate(self, prompt: str, **kwargs) -> str:
+                async def generate(self, prompt: str, **kwargs: Any) -> str:
                     response = self.responses[self.call_count % len(self.responses)]
                     self.call_count += 1
                     return f"Mock response to '{prompt}': {response}"
@@ -123,7 +123,7 @@ class LLMInterface(Protocol):
         while maintaining backward compatibility.
     """
 
-    async def generate(self, prompt: str, **kwargs) -> str:
+    async def generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text response from the given prompt.
 
         Asynchronously processes the input prompt using the underlying LLM service
