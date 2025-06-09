@@ -1,0 +1,247 @@
+# Editor and IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# AI Assistant configurations (project-specific)
+.github/copilot-instructions.md
+.mcp.json
+.serena/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.python-version
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.env.local
+.env.*.local
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Ruff cache
+.ruff_cache/
+
+# UV cache
+.uv_cache/
+
+# SPARC Orchestration specific
+sparc_state/
+workflow_sessions/
+phase_artifacts/
+*.sparc_session
+*.workflow_state
+
+# ConPort database and caches
+context_portal/
+alembic/
+alembic.ini
+
+# MCP server logs and state
+*.mcp.log
+mcp_state/
+.mcp_cache/
+
+# Homelab deployment
+inventory/hosts
+*.retry
+.ansible/
+deployment_logs/
+
+# Docker
+.dockerignore
+Dockerfile*
+docker-compose*.yml
+.docker/
+
+# Kubernetes
+k8s/secrets/
+*.kubeconfig
+
+# Infrastructure as Code
+terraform.tfstate*
+.terraform/
+*.tfvars
+.terraformrc
+
+# Security - Never commit these
+*.key
+*.pem
+*.p12
+*.pfx
+id_rsa*
+id_ed25519*
+*.crt
+*.csr
+config.json
+secrets.yaml
+.secrets
+.env.production
+.env.staging
+
+# API keys and tokens
+*_key
+*_token
+*_secret
+.api_keys
+api_credentials.json
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+context_portal/context.db
+
+# Logs
+logs/
+*.log
+*.log.*
+.logs/
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+*.tmp
+*.bak
+*.backup
+
+# Documentation builds
+docs/_build/
+docs/.doctrees/
+site/
+
+# Package manager files
+node_modules/
+package-lock.json
+yarn.lock
+
+# Local development
+local_config.py
+local_settings.py
+.local/
+
+# Pre-commit
+.pre-commit-cache/
+
+# Profiling
+*.prof
+*.pstats
+profile_*.txt
+
+# Claude Code specific
+.claude/
+claude_cache/
+
+# Serena specific cache
+.serena_cache/
+
+# Project specific temporary directories
+.sparc_temp/
+.orchestration_cache/
+phase_temp/
