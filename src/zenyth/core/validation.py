@@ -40,7 +40,7 @@ Examples:
             return result
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
@@ -107,7 +107,9 @@ class ValidationResult:
         """Initialize empty validation result."""
         self.errors: list[ValidationError] = []
 
-    def add_error(self, field: str, code: ErrorCode, message: str | None = None, **context: Any) -> None:
+    def add_error(
+        self, field: str, code: ErrorCode, message: str | None = None, **context: Any
+    ) -> None:
         """Add validation error to the result.
 
         Args:

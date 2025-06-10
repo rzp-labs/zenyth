@@ -66,7 +66,7 @@ Examples:
 import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, cast
 
 from zenyth.core.exceptions import PhaseExecutionFailedError
 from zenyth.core.types import PhaseContext, PhaseResult, SPARCPhase
@@ -697,9 +697,8 @@ class PseudocodeHandler(PhaseHandler):
         validation_result = self._validate_context(context)
         validation_result.raise_if_invalid()
 
-        # Ensure task_description is not None (guaranteed by validation)
-        assert context.task_description is not None
-        task_desc = context.task_description
+        # Type narrowing: task_description is guaranteed not None by validation
+        task_desc = cast("str", context.task_description)
 
         try:
 
@@ -777,10 +776,9 @@ class PseudocodeHandler(PhaseHandler):
             result.errors.append(error)
             return result  # Early return if required field missing
 
-        # Task description must not be empty (we know it's not None from above check)
-        task_desc = context.task_description
-        assert task_desc is not None  # For mypy - guaranteed by required check above
-        
+        # Type narrowing: task_description is guaranteed not None by required validation above
+        task_desc = cast("str", context.task_description)
+
         if error := validator.validate_not_empty(task_desc, "task_description"):
             result.errors.append(error)
             return result  # Early return if field is empty

@@ -195,4 +195,5 @@ class PhaseExecutionFailedError(ZenythError):
     """Exception raised when phase execution encounters an unrecoverable error."""
 
     def __init__(self) -> None:
+        """Initialize PhaseExecutionFailedError with default message."""
         super().__init__("Phase execution failed")
