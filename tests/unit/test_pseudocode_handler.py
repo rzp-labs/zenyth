@@ -482,3 +482,100 @@ async def test_pseudocode_handler_with_specification_artifacts() -> None:
     # Should incorporate specification information into pseudocode
     pseudocode_doc = result.artifacts["pseudocode_document"]
     assert isinstance(pseudocode_doc, str)  # Serialized document
+
+
+async def test_basic_algorithm_analyzer_with_include_edge_cases_false() -> None:
+    """Test BasicAlgorithmAnalyzer with include_edge_cases=False.
+
+    Tests the main conditional branch when edge cases are disabled.
+    """
+    analyzer = BasicAlgorithmAnalyzer(include_edge_cases=False)
+    task_description = "Build user authentication system"
+    context = {"complexity": "medium"}
+
+    result = await analyzer.analyze(task_description, context)
+
+    # Should not include edge case steps when disabled
+    steps_text = " ".join(result.logical_steps).lower()
+    assert "error conditions" not in steps_text or "edge cases" not in steps_text
+
+
+async def test_basic_pseudocode_generator_with_verbose_verbosity() -> None:
+    """Test BasicPseudocodeGenerator with verbosity_level='verbose'.
+
+    Tests the main conditional branch for verbose output formatting.
+    """
+    generator = BasicPseudocodeGenerator(verbosity_level="verbose", include_comments=True)
+    task_description = "Create database API"
+    analysis = AlgorithmAnalysis(
+        logical_steps=["Connect to database", "Execute query", "Process results"],
+        data_structures=["Connection", "ResultSet"],
+        control_flow=["exception-handling"],
+        complexity_estimate="medium",
+    )
+
+    result = await generator.generate(task_description, analysis, "test-session")
+
+    # Should include verbose formatting and data structure declarations
+    logic_text = " ".join(result.step_by_step_logic)
+    assert "DECLARE" in logic_text  # Verbose mode includes data structure setup
+    assert "// Data Structure Initialization" in logic_text
+
+
+async def test_basic_pseudocode_generator_with_concise_verbosity() -> None:
+    """Test BasicPseudocodeGenerator with verbosity_level='concise'.
+
+    Tests the main conditional branch for concise output formatting.
+    """
+    generator = BasicPseudocodeGenerator(verbosity_level="concise", include_comments=False)
+    task_description = "Simple API endpoint"
+    analysis = AlgorithmAnalysis(
+        logical_steps=["Validate input", "Process request"],
+        data_structures=["Request"],
+        control_flow=["validation"],
+        complexity_estimate="low",
+    )
+
+    result = await generator.generate(task_description, analysis, "test-session")
+
+    # Should use concise formatting without extra details
+    logic_text = " ".join(result.step_by_step_logic)
+    assert "1. Validate input" in logic_text  # Concise format
+    assert "STEP 1:" not in logic_text  # Not verbose format
+
+
+async def test_algorithm_analyzer_with_database_task() -> None:
+    """Test algorithm analysis with database-specific task.
+
+    Tests the main conditional branch for database-related tasks.
+    """
+    analyzer = BasicAlgorithmAnalyzer()
+    task_description = "Build database connection pool manager"
+    context = {"scale": "large"}
+
+    result = await analyzer.analyze(task_description, context)
+
+    # Should identify database-specific steps and structures
+    steps_text = " ".join(result.logical_steps).lower()
+    assert "database" in steps_text or "connection" in steps_text
+    structures_text = " ".join(result.data_structures).lower()
+    assert "connection" in structures_text
+
+
+async def test_algorithm_analyzer_with_api_task() -> None:
+    """Test algorithm analysis with API-specific task.
+
+    Tests the main conditional branch for API-related tasks.
+    """
+    analyzer = BasicAlgorithmAnalyzer()
+    task_description = "Create REST API endpoint for user management"
+    context = {"flow_type": "parallel"}
+
+    result = await analyzer.analyze(task_description, context)
+
+    # Should identify API-specific steps and structures
+    steps_text = " ".join(result.logical_steps).lower()
+    assert "request" in steps_text or "validate" in steps_text
+    structures_text = " ".join(result.data_structures).lower()
+    assert "request" in structures_text
+    assert "response" in structures_text
