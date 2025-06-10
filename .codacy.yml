@@ -1,0 +1,12 @@
+engines:
+  pylint:
+    enabled: true
+  bandit:
+    enabled: true
+exclude_paths:
+  - '.venv/**'
+  - '**/__pycache__/**'
+  - 'htmlcov/**'
+  - '.codacy/**'
+  - 'logs/**'
+  - 'src/zenyth.egg-info/**'

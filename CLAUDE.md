@@ -62,6 +62,42 @@ Ready to assist with your request.
 - NEVER deviate from existing project standards and patterns
 - NEVER make architectural decisions without explicit approval
 
+## Important Constraints
+
+- Follow SOLID principles rigorously (see [@agent/rules/SOLID_PRINCIPLES.md](@agent/rules/SOLID_PRINCIPLES.md))
+- Maintain interface contracts for all abstractions
+- Use dependency injection for all components
+- Implement new phases as plugins, not modifications
+- Security scanning with Trivy after dependency changes
+
+### Listen to the Guardrails
+
+**Key Principle**: SOLID principles and type checking are guardrails that guide us toward better design, not hindrances to bypass.
+
+**What This Means:**
+- When linting rules warn "method could be static" → Consider if the method truly needs instance state
+- When type checker complains about `None` values → Fix the types at the source, don't mask with workarounds
+- When exceptions feel awkward → Use Python's natural exception handling, don't create artificial `NoReturn` helpers
+- When code feels complex → Simplify the design rather than adding annotations to work around complexity
+
+**Anti-patterns to Avoid:**
+- Adding artificial instance variables just to avoid "could be static" warnings
+- Using `NoReturn` annotations to bypass proper exception handling
+- Creating helper methods that only exist to satisfy linting rules
+- Fighting the type system instead of listening to what it's telling us
+
+**Successful Pattern:**
+- Listen to what tools are telling us about our design
+- Fix root causes rather than symptoms
+- Work with the language and tools, not against them
+- Let SOLID principles emerge naturally from good design choices
+
+**Evidence**: The PseudocodeHandler refactoring (removing `NoReturn` helpers and artificial patterns) resulted in:
+- Simpler, more readable code
+- All tests passing without modification of core logic
+- Better SOLID compliance achieved naturally
+- Type checking working with the design instead of against it
+
 ### ConPort Integration
 
 **Workspace ID:** `/Users/stephen/Projects/rzp-labs/zenyth`
@@ -177,11 +213,3 @@ Phases receive only relevant context to optimize memory usage:
 - Line length: 100 characters (Black and Ruff)
 - Python 3.10+ required
 - Strict mypy configuration enabled
-
-## Important Constraints
-
-- Follow SOLID principles rigorously (see [@agent/rules/SOLID_PRINCIPLES.md](@agent/rules/SOLID_PRINCIPLES.md))
-- Maintain interface contracts for all abstractions
-- Use dependency injection for all components
-- Implement new phases as plugins, not modifications
-- Security scanning with Trivy after dependency changes
