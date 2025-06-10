@@ -73,20 +73,15 @@ from zenyth.core.types import PhaseContext, PhaseResult, SPARCPhase
 from zenyth.core.validation import ValidationResult, Validator
 from zenyth.phases.base import PhaseHandler
 
-# Constants for magic values
+# Constants for algorithm analysis and pseudocode generation
 MIN_STEPS_FOR_COMPLEXITY = 3
 MIN_COMPLEXITY_THRESHOLD = 10
 MIN_LOGICAL_STEPS = 5
 MIN_STEP_COUNT = 3
-MAX_STEP_COUNT = 10
+MAX_STEP_COUNT = 20  # Use higher limit for comprehensive analysis
 DEFAULT_NEXT_PHASE_COUNT = 5
-
-
-# Constants for magic numbers
 DEFAULT_MAX_STEPS = 10
 DEFAULT_COMPLEXITY_THRESHOLD = 0.5
-MIN_STEP_COUNT = 3
-MAX_STEP_COUNT = 20
 
 logger = logging.getLogger(__name__)
 
