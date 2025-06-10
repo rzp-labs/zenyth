@@ -196,9 +196,7 @@ class Validator:
         return None
 
     @staticmethod
-    def validate_min_length(
-        value: str, field: str, min_length: int
-    ) -> ValidationError | None:
+    def validate_min_length(value: str, field: str, min_length: int) -> ValidationError | None:
         """Validate that a string meets minimum length requirement.
 
         Args:
@@ -219,9 +217,7 @@ class Validator:
         return None
 
     @staticmethod
-    def validate_max_length(
-        value: str, field: str, max_length: int
-    ) -> ValidationError | None:
+    def validate_max_length(value: str, field: str, max_length: int) -> ValidationError | None:
         """Validate that a string does not exceed maximum length.
 
         Args:
