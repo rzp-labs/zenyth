@@ -61,12 +61,14 @@ class PhaseContext:
         task_description: The original task description or current focus
         previous_phases: List of PhaseResult objects from completed phases
         global_artifacts: Shared artifacts accessible to all phases
+        metadata: Additional context metadata as key-value pairs
     """
 
     session_id: str
     task_description: str | None
     previous_phases: list["PhaseResult"] = field(default_factory=list)
     global_artifacts: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
