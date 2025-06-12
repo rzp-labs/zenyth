@@ -12,4 +12,3 @@ def test_session_context_stores_metadata_when_provided() -> None:
     metadata = {"start_time": "2024-01-01"}
     context = SessionContext(session_id="test", task="test", metadata=metadata)
     assert context.metadata == metadata
-

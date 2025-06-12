@@ -13,4 +13,3 @@ def test_session_context_with_metadata() -> None:
     context = SessionContext(session_id="test", task="test", metadata=metadata)
     assert context.metadata == metadata
     assert context.metadata["user"] == "test_user"
-

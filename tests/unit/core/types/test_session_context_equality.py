@@ -15,4 +15,3 @@ def test_session_context_equality() -> None:
 
     assert context1 == context2
     assert context1 != context3
-

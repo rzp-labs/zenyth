@@ -13,4 +13,3 @@ def test_session_context_with_artifacts() -> None:
     context = SessionContext(session_id="test", task="test", artifacts=artifacts)
     assert context.artifacts == artifacts
     assert context.artifacts["spec"] == "requirement doc"
-

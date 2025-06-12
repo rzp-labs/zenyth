@@ -12,4 +12,3 @@ def test_session_context_stores_artifacts_when_provided() -> None:
     artifacts = {"spec": "requirement"}
     context = SessionContext(session_id="test", task="test", artifacts=artifacts)
     assert context.artifacts == artifacts
-

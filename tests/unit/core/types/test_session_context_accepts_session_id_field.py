@@ -11,4 +11,3 @@ def test_session_context_accepts_session_id_field() -> None:
     """Test SessionContext accepts session_id field."""
     context = SessionContext(session_id="test-session", task="test")
     assert context.session_id == "test-session"
-

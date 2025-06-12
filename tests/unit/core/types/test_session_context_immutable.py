@@ -16,4 +16,3 @@ def test_session_context_immutable() -> None:
     # Should raise AttributeError when trying to modify
     with pytest.raises(AttributeError):
         context.session_id = "modified"
-

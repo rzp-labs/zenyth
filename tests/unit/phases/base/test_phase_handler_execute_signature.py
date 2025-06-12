@@ -12,7 +12,7 @@ from zenyth.phases.base import PhaseHandler
 
 class ConcreteHandler(PhaseHandler):
     """Test handler for signature validation."""
-    
+
     def __init__(self, result_phase: str = "test") -> None:
         self.result_phase = result_phase
 

@@ -15,4 +15,3 @@ def test_session_context_prevents_field_modification() -> None:
 
     with pytest.raises(AttributeError):
         context.session_id = "modified"
-

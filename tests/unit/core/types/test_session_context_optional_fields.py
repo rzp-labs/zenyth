@@ -12,4 +12,3 @@ def test_session_context_optional_fields() -> None:
     context = SessionContext(session_id="test", task="test")
     assert context.artifacts == {}
     assert context.metadata == {}
-

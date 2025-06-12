@@ -12,4 +12,3 @@ def test_session_context_supports_equality_comparison() -> None:
     context1 = SessionContext(session_id="test", task="task1")
     context2 = SessionContext(session_id="test", task="task1")
     assert context1 == context2
-

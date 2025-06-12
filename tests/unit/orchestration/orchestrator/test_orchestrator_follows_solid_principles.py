@@ -37,9 +37,7 @@ def test_sparc_orchestrator_follows_solid_principles() -> None:
     ]
     # Methods like set_phase_registry are acceptable as they're for dependency injection
     phase_methods = [
-        attr
-        for attr in all_methods
-        if "phase" in attr.lower() and not attr.startswith("set_")
+        attr for attr in all_methods if "phase" in attr.lower() and not attr.startswith("set_")
     ]
     tool_methods = [
         attr for attr in all_methods if "tool" in attr.lower() and attr != "tool_registry"

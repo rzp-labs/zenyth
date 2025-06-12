@@ -4,15 +4,16 @@ This test validates interface contract for prerequisite validation
 following Dependency Inversion Principle.
 """
 
-from typing import Dict, Any
+from typing import Any
+
 from zenyth.core.types import PhaseContext, PhaseResult
 from zenyth.phases.base import PhaseHandler
 
 
 class ValidationHandler(PhaseHandler):
     """Test handler with instance-based validation rules."""
-    
-    def __init__(self, validation_rules: Dict[str, Any]) -> None:
+
+    def __init__(self, validation_rules: dict[str, Any]) -> None:
         self.validation_rules = validation_rules
 
     async def execute(self, context: PhaseContext) -> PhaseResult:

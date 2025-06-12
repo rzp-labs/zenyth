@@ -12,4 +12,3 @@ def test_session_context_initialization() -> None:
     context = SessionContext(session_id="test-session", task="test task")
     assert context.session_id == "test-session"
     assert context.task == "test task"
-

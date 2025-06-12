@@ -11,4 +11,3 @@ def test_session_context_accepts_task_field() -> None:
     """Test SessionContext accepts task field."""
     context = SessionContext(session_id="test", task="test task")
     assert context.task == "test task"
-
