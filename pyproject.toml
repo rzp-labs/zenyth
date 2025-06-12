@@ -62,6 +62,7 @@ dev-dependencies = [
     "opentelemetry-api>=1.22.0",
     "opentelemetry-sdk>=1.22.0",
     "context-portal-mcp>=0.2.5",
+    "pytest-httpx>=0.35.0",
 ]
 
 [tool.ruff]

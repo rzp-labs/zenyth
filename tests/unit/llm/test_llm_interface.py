@@ -104,33 +104,34 @@ def test_llm_interface_supports_protocol_checking():
 
         async def generate(self, prompt: str, **kwargs) -> str:
             return f"{self.name}: test"
-        
+
         async def complete_chat(self, prompt: str, **kwargs) -> LLMResponse:
             return LLMResponse(content=f"{self.name}: test")
-        
+
         async def create_session(self) -> str:
             return "test-session"
-        
+
         async def complete_chat_with_session(
             self, session_id: str, prompt: str, **kwargs
         ) -> LLMResponse:
             return LLMResponse(content=f"{self.name}: test")
-        
+
         async def get_session_history(self, session_id: str) -> dict[str, Any]:
             return {"messages": []}
-        
+
         async def fork_session(self, session_id: str, name: str | None = None) -> str:
             return f"{session_id}-fork"
-        
+
         async def revert_session(self, session_id: str, steps: int = 1) -> None:
             pass
-        
+
         async def get_session_metadata(self, session_id: str) -> dict[str, Any]:
             return {"session_id": session_id}
-        
+
         def stream_chat(self, prompt: str, **kwargs) -> AsyncGenerator[LLMResponse, None]:
             async def _generator() -> AsyncGenerator[LLMResponse, None]:
                 yield LLMResponse(content="test")
+
             return _generator()
 
     assert isinstance(TestLLM(), LLMInterface)

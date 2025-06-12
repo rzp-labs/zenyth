@@ -207,33 +207,34 @@ def test_llm_interface_protocol_still_works() -> None:
 
         async def generate(self, prompt: str, **kwargs: Any) -> str:
             return f"{self.response_prefix}{prompt}"
-        
+
         async def complete_chat(self, prompt: str, **kwargs: Any) -> LLMResponse:
             return LLMResponse(content=f"{self.response_prefix}{prompt}")
-        
+
         async def create_session(self) -> str:
             return "mock-session-123"
-        
+
         async def complete_chat_with_session(
             self, session_id: str, prompt: str, **kwargs: Any
         ) -> LLMResponse:
             return LLMResponse(content=f"{self.response_prefix}{prompt}")
-        
+
         async def get_session_history(self, session_id: str) -> dict[str, Any]:
             return {"messages": [], "session_id": session_id}
-        
+
         async def fork_session(self, session_id: str, name: str | None = None) -> str:
             return f"{session_id}-fork"
-        
+
         async def revert_session(self, session_id: str, steps: int = 1) -> None:
             pass
-        
+
         async def get_session_metadata(self, session_id: str) -> dict[str, Any]:
             return {"session_id": session_id}
-        
+
         def stream_chat(self, prompt: str, **kwargs: Any) -> AsyncGenerator[LLMResponse, None]:
             async def _generator() -> AsyncGenerator[LLMResponse, None]:
                 yield LLMResponse(content="mock")
+
             return _generator()
 
     provider = MockLLMProvider()
