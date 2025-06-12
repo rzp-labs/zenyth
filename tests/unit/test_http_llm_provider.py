@@ -12,6 +12,8 @@ SOLID Principles Alignment:
 - DIP: Tests depend on LLMInterface abstraction for protocol checking
 """
 
+from collections.abc import Mapping
+
 import pytest
 
 from zenyth.core.interfaces import LLMInterface
@@ -29,7 +31,7 @@ def test_http_provider_implements_llm_interface():
     assert isinstance(provider, LLMInterface)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_generate_returns_string():
     """Test HTTPLLMProvider.generate returns a string response.
 
@@ -55,7 +57,7 @@ def test_http_provider_init_requires_base_url():
         HTTPLLMProvider()  # Should fail without base_url
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_complete_chat_returns_llm_response():
     """Test HTTPLLMProvider.complete_chat returns LLMResponse.
 
@@ -68,7 +70,8 @@ async def test_http_provider_complete_chat_returns_llm_response():
     assert isinstance(response, LLMResponse)
     assert isinstance(response.content, str)
     assert len(response.content) > 0
-    assert isinstance(response.metadata, dict)
+    assert isinstance(response.metadata, Mapping)
+    assert response.metadata["model"] == "test"
 
 
 def test_http_provider_normalizes_base_url():
@@ -81,7 +84,7 @@ def test_http_provider_normalizes_base_url():
     assert provider.base_url == "http://localhost:3001"
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_create_session_returns_session_id():
     """Test HTTPLLMProvider.create_session returns a session ID.
 
@@ -93,10 +96,10 @@ async def test_http_provider_create_session_returns_session_id():
 
     assert isinstance(session_id, str)
     assert len(session_id) > 0
-    assert session_id != ""
+    assert session_id  # Non-empty string check
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_complete_chat_with_session():
     """Test HTTPLLMProvider.complete_chat_with_session returns LLMResponse.
 
@@ -110,10 +113,10 @@ async def test_http_provider_complete_chat_with_session():
     assert isinstance(response, LLMResponse)
     assert isinstance(response.content, str)
     assert len(response.content) > 0
-    assert response.content != ""
+    assert response.content  # Non-empty string check
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_get_session_history():
     """Test HTTPLLMProvider.get_session_history returns session data.
 
@@ -129,7 +132,7 @@ async def test_http_provider_get_session_history():
     assert isinstance(history["messages"], list)
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_fork_session():
     """Test HTTPLLMProvider.fork_session creates a new session.
 
@@ -145,7 +148,7 @@ async def test_http_provider_fork_session():
     assert forked_session != original_session
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_revert_session():
     """Test HTTPLLMProvider.revert_session doesn't raise exception.
 
@@ -159,7 +162,7 @@ async def test_http_provider_revert_session():
     assert True  # If we get here, no exception was raised
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_get_session_metadata():
     """Test HTTPLLMProvider.get_session_metadata returns metadata.
 
@@ -175,7 +178,7 @@ async def test_http_provider_get_session_metadata():
     assert metadata["session_id"] == session_id
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_http_provider_stream_chat():
     """Test HTTPLLMProvider.stream_chat returns async generator.
 
@@ -183,13 +186,13 @@ async def test_http_provider_stream_chat():
     """
     provider = HTTPLLMProvider(base_url="http://localhost:3001")
 
-    # Get the generator
-    generator = await provider.stream_chat("Hello")
-
     # Collect all streamed responses
     responses = []
-    async for chunk in generator:
+    async for chunk in provider.stream_chat("Hello"):
         responses.append(chunk)
 
     assert len(responses) > 0
     assert responses[0] is not None
+    assert isinstance(responses[0], LLMResponse)
+    assert responses[0].content == "Hello"
+    assert responses[1].content == " world"

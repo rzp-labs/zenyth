@@ -27,8 +27,10 @@ Examples:
         )
 """
 
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
+from types import MappingProxyType
 from typing import Any
 
 
@@ -347,7 +349,8 @@ class LLMResponse:
     Attributes:
         content: The generated text content from the LLM provider
         metadata: Additional response metadata including usage stats, timing,
-                 session information, and provider-specific data
+                 session information, and provider-specific data. This is stored
+                 as an immutable mapping to maintain the frozen contract.
 
     Examples:
         Basic chat completion response::
@@ -387,4 +390,9 @@ class LLMResponse:
     """
 
     content: str
-    metadata: dict[str, Any] = field(default_factory=dict)
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    def __post_init__(self) -> None:
+        """Convert metadata to an immutable proxy to honor the frozen contract."""
+        # Convert to an immutable proxy to prevent mutation
+        object.__setattr__(self, "metadata", MappingProxyType(dict(self.metadata)))

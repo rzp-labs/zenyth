@@ -38,9 +38,10 @@ Examples:
             result = await provider.generate("Hello")
 """
 
+from collections.abc import AsyncGenerator
 from typing import Any, Protocol, runtime_checkable
 
-from zenyth.core.exceptions import (  # noqa: F401
+from zenyth.core.exceptions import (
     CorruptionError,
     SessionNotFoundError,
     StorageError,
@@ -171,7 +172,7 @@ class LLMInterface(Protocol):
         """
         ...
 
-    async def stream_chat(self, prompt: str, **kwargs: Any) -> Any:
+    def stream_chat(self, prompt: str, **kwargs: Any) -> AsyncGenerator[LLMResponse, None]:
         """Stream chat completion responses in real-time.
 
         Yields incremental response chunks for real-time monitoring and

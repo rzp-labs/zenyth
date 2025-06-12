@@ -13,10 +13,11 @@ SOLID Principles Alignment:
 from collections.abc import AsyncGenerator
 from typing import Any
 
+from zenyth.core.interfaces import LLMInterface
 from zenyth.core.types import LLMResponse
 
 
-class HTTPLLMProvider:
+class HTTPLLMProvider(LLMInterface):
     """Minimal stub for HTTP-based LLM provider."""
 
     def __init__(self, base_url: str) -> None:
@@ -79,19 +80,16 @@ class HTTPLLMProvider:
         _ = self.base_url
         return {"session_id": session_id, "created_at": "2024-01-01T00:00:00Z"}
 
-    async def stream_chat(self, prompt: str, **kwargs: Any) -> AsyncGenerator[str, None]:
+    async def stream_chat(self, prompt: str, **kwargs: Any) -> AsyncGenerator[LLMResponse, None]:
         """Stream chat completion responses in real-time."""
         # Parameters will be used in actual HTTP implementation
         _ = (prompt, kwargs, self.base_url)
 
-        async def _generator() -> AsyncGenerator[str, None]:
-            # Using await to make this properly async
-            await self._simulate_delay()
-            yield "Hello"
-            await self._simulate_delay()
-            yield " world"
-
-        return _generator()
+        # Using await to make this properly async
+        await self._simulate_delay()
+        yield LLMResponse(content="Hello", metadata={"chunk_index": 0})
+        await self._simulate_delay()
+        yield LLMResponse(content=" world", metadata={"chunk_index": 1})
 
     async def _simulate_delay(self) -> None:
         """Simulate async delay for stub implementation."""
