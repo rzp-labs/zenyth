@@ -28,22 +28,19 @@ jobs:
       with:
         python-version: '3.11'
 
-    - name: Install UV package manager
-      run: |
-        curl -LsSf https://astral.sh/uv/install.sh | sh
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-
-    - name: Cache UV dependencies
-      uses: actions/cache@v4
+    # Use official UV GitHub Action for better caching
+    - name: Install UV
+      uses: astral-sh/setup-uv@v5
       with:
-        path: ~/.cache/uv
-        key: ${{ runner.os }}-uv-${{ hashFiles('**/uv.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-uv-
+        enable-cache: true
+        cache-dependency-glob: |
+          **/uv.lock
+          **/pyproject.toml
 
+    # UV will automatically use its cache from the action above
     - name: Install dependencies
       run: |
-        uv sync --dev
+        uv sync --dev --frozen
 
     # ============ FUNDAMENTAL DESIGN VALIDATION ============
     - name: SOLID Principles Validation
@@ -56,28 +53,58 @@ jobs:
         echo "✅ Architecture compliance validated"
 
     # ============ QUALITY GATES ============
-    - name: Format with Black
+    # Run all quality checks in parallel for speed
+    - name: Run Quality Checks in Parallel
       run: |
-        uv run black src/ tests/
-        git diff --exit-code || (echo "Code was reformatted by Black. Please commit the changes." && exit 1)
-
-    - name: Lint with Ruff
-      run: |
-        uv run ruff check --fix src/ tests/ --output-format=github
-        git diff --exit-code || (echo "Code was auto-fixed by Ruff. Please commit the changes." && exit 1)
-
-    - name: Type check (MyPy)
-      run: |
-        uv run mypy src/ --no-error-summary
-
-    - name: Security check (Bandit)
-      run: |
-        uv run bandit -r src/ -ll
+        # Function to run check and capture result
+        run_check() {
+          local name=$1
+          local cmd=$2
+          echo "::group::$name"
+          if eval "$cmd"; then
+            echo "✅ $name passed"
+            echo "::endgroup::"
+            return 0
+          else
+            echo "❌ $name failed"
+            echo "::endgroup::"
+            return 1
+          fi
+        }
+        
+        # Export function for subshells
+        export -f run_check
+        
+        # Run all checks in parallel
+        (run_check "Black Format Check" "uv run black src/ tests/ --check --diff") &
+        BLACK_PID=$!
+        
+        (run_check "Ruff Linting" "uv run ruff check src/ tests/ --output-format=github") &
+        RUFF_PID=$!
+        
+        (run_check "MyPy Type Check" "uv run mypy src/ --no-error-summary") &
+        MYPY_PID=$!
+        
+        (run_check "Bandit Security" "uv run bandit -r src/ -ll") &
+        BANDIT_PID=$!
+        
+        # Wait for all and check results
+        FAILED=0
+        for pid in $BLACK_PID $RUFF_PID $MYPY_PID $BANDIT_PID; do
+          wait $pid || FAILED=1
+        done
+        
+        if [ $FAILED -eq 1 ]; then
+          echo "❌ One or more quality checks failed"
+          exit 1
+        fi
+        echo "✅ All quality checks passed"
 
     # ============ TESTING ============
     - name: Run tests with coverage
       run: |
-        uv run pytest --cov=zenyth --cov-report=xml --cov-report=term-missing --junitxml=pytest-report.xml
+        uv run pytest --cov=zenyth --cov-report=xml --cov-report=term-missing \
+          --junitxml=junit.xml -o junit_family=legacy -n auto
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
@@ -88,6 +115,12 @@ jobs:
         fail_ci_if_error: false
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: nehpz/zenyth
+
+    - name: Upload test results to Codecov
+      if: ${{ !cancelled() }}
+      uses: codecov/test-results-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
 
     # ============ SONARCLOUD ANALYSIS ============
     - name: SonarCloud Analysis
