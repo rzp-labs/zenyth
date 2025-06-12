@@ -45,7 +45,10 @@ Thread Safety:
     atomic modulo arithmetic to prevent race conditions.
 """
 
+from collections.abc import AsyncGenerator
 from typing import Any
+
+from zenyth.core.types import LLMResponse
 
 
 class MockLLMProvider:
@@ -208,3 +211,75 @@ class MockLLMProvider:
         # Cycle through responses using modulo arithmetic
         response_index = (self._call_count - 1) % len(self._responses)
         return self._responses[response_index]
+    
+    async def complete_chat(self, prompt: str, **kwargs: Any) -> LLMResponse:
+        """Generate a mock chat completion response."""
+        response = await self.generate(prompt, **kwargs)
+        return LLMResponse(content=response, metadata={"mock": True})
+    
+    async def create_session(self) -> str:
+        """Create a mock session ID."""
+        self._call_count += 1
+        return f"mock-session-{self._call_count}"
+    
+    async def complete_chat_with_session(
+        self, session_id: str, prompt: str, **kwargs: Any
+    ) -> LLMResponse:
+        """Generate a mock chat completion within a session."""
+        response = await self.generate(prompt, **kwargs)
+        return LLMResponse(
+            content=response, 
+            metadata={"session_id": session_id, "mock": True}
+        )
+    
+    async def get_session_history(self, session_id: str) -> dict[str, Any]:
+        """Get mock session history."""
+        return {
+            "session_id": session_id,
+            "messages": [{"role": "user", "content": p} for p in self._prompts],
+            "mock": True
+        }
+    
+    async def fork_session(self, session_id: str, name: str | None = None) -> str:
+        """Fork a mock session."""
+        fork_name = name or "default"
+        return f"{session_id}-fork-{fork_name}"
+    
+    async def revert_session(self, session_id: str, steps: int = 1) -> None:
+        """Mock session reversion (no-op)."""
+        # Mock implementation - just track the call
+        _ = (session_id, steps)
+    
+    async def get_session_metadata(self, session_id: str) -> dict[str, Any]:
+        """Get mock session metadata."""
+        return {
+            "session_id": session_id,
+            "created_at": "2024-01-01T00:00:00Z",
+            "message_count": len(self._prompts),
+            "mock": True
+        }
+    
+    def stream_chat(self, prompt: str, **kwargs: Any) -> AsyncGenerator[LLMResponse, None]:
+        """Stream mock chat responses."""
+        async def _generator() -> AsyncGenerator[LLMResponse, None]:
+            # Track the call
+            self._call_count += 1
+            self._prompts.append(prompt)
+            self._last_kwargs = kwargs.copy()
+            
+            # Generate response chunks
+            if self._should_raise:
+                raise RuntimeError("Mock LLM configured to raise errors for testing")
+                
+            response_index = (self._call_count - 1) % len(self._responses)
+            response = self._responses[response_index]
+            
+            # Split response into chunks for streaming
+            words = response.split()
+            for i, word in enumerate(words):
+                yield LLMResponse(
+                    content=word + (" " if i < len(words) - 1 else ""),
+                    metadata={"chunk_index": i, "mock": True}
+                )
+        
+        return _generator()

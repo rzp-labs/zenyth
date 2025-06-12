@@ -55,13 +55,6 @@ jobs:
         echo "🏗️ Validating architecture compliance..."
         echo "✅ Architecture compliance validated"
 
-    # ============ UPFRONT ANALYSIS ============
-    - name: SonarCloud Analysis (Early Static Analysis)
-      uses: SonarSource/sonarqube-scan-action@v5.2.0
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: https://sonarcloud.io
-
     # ============ QUALITY GATES ============
     - name: Format with Black
       run: |
@@ -96,9 +89,9 @@ jobs:
         token: ${{ secrets.CODECOV_TOKEN }}
         slug: nehpz/zenyth
 
-    # ============ ENHANCED ANALYSIS (with coverage) ============
-    - name: SonarCloud Analysis (Coverage Enhanced)
-      if: success()
+    # ============ SONARCLOUD ANALYSIS ============
+    - name: SonarCloud Analysis
+      if: always()
       uses: SonarSource/sonarqube-scan-action@v5.2.0
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -130,10 +123,10 @@ jobs:
         echo "## 🎯 Quality Gate Results" >> $GITHUB_STEP_SUMMARY
         echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
         echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-        echo "| SonarCloud Analysis | ✅ Completed |" >> $GITHUB_STEP_SUMMARY
-        echo "| Code Coverage | ✅ ≥80% Required |" >> $GITHUB_STEP_SUMMARY
+        echo "| SOLID Compliance | ✅ Validated |" >> $GITHUB_STEP_SUMMARY
         echo "| Format (Black) | ✅ Compliant |" >> $GITHUB_STEP_SUMMARY
         echo "| Linting (Ruff) | ✅ Passed |" >> $GITHUB_STEP_SUMMARY
         echo "| Type Safety (MyPy) | ✅ Validated |" >> $GITHUB_STEP_SUMMARY
         echo "| Security (Bandit) | ✅ Approved |" >> $GITHUB_STEP_SUMMARY
-        echo "| SOLID Compliance | ✅ Validated |" >> $GITHUB_STEP_SUMMARY
+        echo "| Code Coverage | ✅ Generated |" >> $GITHUB_STEP_SUMMARY
+        echo "| SonarCloud Analysis | ✅ With Coverage |" >> $GITHUB_STEP_SUMMARY
