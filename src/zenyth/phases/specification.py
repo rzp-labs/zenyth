@@ -103,7 +103,10 @@ class SpecificationGenerator(ABC):
 
     @abstractmethod
     async def generate(
-        self, task_description: str, analysis: RequirementsAnalysis, session_id: str
+        self,
+        task_description: str,
+        analysis: RequirementsAnalysis,
+        session_id: str,
     ) -> SpecificationDocument:
         """Generate specification document from analysis.
 
@@ -209,7 +212,10 @@ class BasicSpecificationGenerator(SpecificationGenerator):
         self._include_detailed_analysis = include_detailed_analysis
 
     async def generate(
-        self, task_description: str, analysis: RequirementsAnalysis, session_id: str
+        self,
+        task_description: str,
+        analysis: RequirementsAnalysis,
+        session_id: str,
     ) -> SpecificationDocument:
         """Generate basic specification document."""
         # Create overview section with conditional detail based on instance config
@@ -329,12 +335,15 @@ class SpecificationHandler(PhaseHandler):
 
         # Use injected analyzer strategy (Dependency Inversion)
         analysis = await self._requirements_analyzer.analyze(
-            task_description, context.global_artifacts
+            task_description,
+            context.global_artifacts,
         )
 
         # Use injected generator strategy (Dependency Inversion)
         specification = await self._specification_generator.generate(
-            task_description, analysis, context.session_id
+            task_description,
+            analysis,
+            context.session_id,
         )
 
         # Structure artifacts for next phase
@@ -399,7 +408,9 @@ class SpecificationHandler(PhaseHandler):
         return artifacts
 
     def _create_metadata(
-        self, context: PhaseContext, analysis: RequirementsAnalysis
+        self,
+        context: PhaseContext,
+        analysis: RequirementsAnalysis,
     ) -> dict[str, Any]:
         """Create execution metadata using instance configuration.
 

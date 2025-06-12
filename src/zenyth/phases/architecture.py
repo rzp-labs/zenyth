@@ -72,7 +72,10 @@ class ArchitectureDiagrammer(ABC):
 
     @abstractmethod
     async def generate(
-        self, task_description: str, analysis: dict[str, Any], session_id: str
+        self,
+        task_description: str,
+        analysis: dict[str, Any],
+        session_id: str,
     ) -> dict[str, Any]:
         """Generate architecture diagram from system analysis.
 
@@ -153,7 +156,8 @@ class BasicSystemDesigner(SystemDesigner):
         # Calculate complexity using instance preferences
         base_complexity = len(components) * 0.1 + len(relationships) * 0.15
         complexity_score = min(
-            1.0, base_complexity * 1.2 if self._prefer_microservices else base_complexity
+            1.0,
+            base_complexity * 1.2 if self._prefer_microservices else base_complexity,
         )
 
         analysis = {
@@ -197,7 +201,10 @@ class BasicArchitectureDiagrammer(ArchitectureDiagrammer):
         self._max_components_per_diagram = max_components_per_diagram
 
     async def generate(
-        self, task_description: str, analysis: dict[str, Any], session_id: str
+        self,
+        task_description: str,
+        analysis: dict[str, Any],
+        session_id: str,
     ) -> dict[str, Any]:
         """Generate diagram using instance configuration."""
         logger.info("Creating %s diagram for task: %s", self._diagram_format, task_description[:30])
@@ -224,7 +231,7 @@ class BasicArchitectureDiagrammer(ArchitectureDiagrammer):
                     "component_count": len(components),
                     "relationship_count": len(relationships),
                     "max_components_limit": self._max_components_per_diagram,
-                }
+                },
             )
 
         return {
@@ -314,7 +321,8 @@ class ArchitectureHandler(PhaseHandler):
         try:
             # Use injected system designer strategy
             analysis = await self._system_designer.analyze(
-                context.task_description, context.global_artifacts
+                context.task_description,
+                context.global_artifacts,
             )
 
             # Validate minimum requirements using instance configuration
@@ -327,13 +335,15 @@ class ArchitectureHandler(PhaseHandler):
                     metadata={
                         "error": (
                             f"Insufficient components: {len(components)} < {self._min_components}"
-                        )
+                        ),
                     },
                 )
 
             # Use injected diagrammer strategy
             diagram = await self._architecture_diagrammer.generate(
-                context.task_description, analysis, context.session_id
+                context.task_description,
+                analysis,
+                context.session_id,
             )
 
             # Create artifacts using instance configuration
@@ -361,7 +371,8 @@ class ArchitectureHandler(PhaseHandler):
     def validate_prerequisites(self, context: PhaseContext) -> bool:
         """Validate prerequisites using instance configuration."""
         logger.info(
-            "Validating architecture prerequisites with min_components=%d", self._min_components
+            "Validating architecture prerequisites with min_components=%d",
+            self._min_components,
         )
 
         specification = context.global_artifacts.get("specification")
@@ -381,7 +392,10 @@ class ArchitectureHandler(PhaseHandler):
         return True
 
     def _create_artifacts(
-        self, analysis: dict[str, Any], diagram: dict[str, Any], context: PhaseContext
+        self,
+        analysis: dict[str, Any],
+        diagram: dict[str, Any],
+        context: PhaseContext,
     ) -> dict[str, Any]:
         """Create architecture artifacts using instance configuration."""
         artifacts: dict[str, Any] = {

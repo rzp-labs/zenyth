@@ -10,6 +10,15 @@ from zenyth.core.types import SPARCPhase
 from zenyth.phases.base import PhaseHandler
 
 
+class HandlerNotRegisteredError(ValueError):
+    """Raised when no handler is registered for a requested phase."""
+
+    def __init__(self, phase: SPARCPhase) -> None:
+        """Initialize with the missing phase."""
+        self.phase = phase
+        super().__init__(f"No handler registered for phase: {phase}")
+
+
 class PhaseHandlerRegistry:
     """Registry for managing phase handler implementations.
 
@@ -22,7 +31,10 @@ class PhaseHandlerRegistry:
         self._handlers: dict[SPARCPhase, tuple[Any, str]] = {}
 
     def register(
-        self, phase: SPARCPhase, handler_class: type[PhaseHandler] | Any, name: str = ""
+        self,
+        phase: SPARCPhase,
+        handler_class: type[PhaseHandler] | Any,
+        name: str = "",
     ) -> None:
         """Register a phase handler for given phase.
 
@@ -67,7 +79,7 @@ class PhaseHandlerRegistry:
             ValueError: If no handler registered for phase or instantiation fails
         """
         if phase not in self._handlers:
-            raise ValueError(f"No handler registered for phase: {phase}")  # noqa: TRY003
+            raise HandlerNotRegisteredError(phase)
 
         handler_class, name = self._handlers[phase]
 

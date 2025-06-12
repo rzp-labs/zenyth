@@ -41,12 +41,6 @@ Examples:
 from collections.abc import AsyncGenerator
 from typing import Any, Protocol, runtime_checkable
 
-from zenyth.core.exceptions import (
-    CorruptionError,
-    SessionNotFoundError,
-    StorageError,
-    ValidationError,
-)
 from zenyth.core.types import LLMResponse, SessionContext, SPARCPhase
 
 
@@ -111,7 +105,10 @@ class LLMInterface(Protocol):
         ...
 
     async def complete_chat_with_session(
-        self, session_id: str, prompt: str, **kwargs: Any
+        self,
+        session_id: str,
+        prompt: str,
+        **kwargs: Any,
     ) -> LLMResponse:
         """Generate chat completion within an existing session.
 
@@ -371,8 +368,8 @@ class IStateManager(Protocol):
                     execution metadata.
 
         Raises:
-            StorageError: If session cannot be saved due to storage issues
-            ValidationError: If session data is invalid or incomplete
+            zenyth.core.exceptions.StorageError: If session cannot be saved due to storage issues
+            zenyth.core.exceptions.ValidationError: If session data is invalid or incomplete
             PermissionError: If insufficient permissions for storage operation
 
         Examples:
@@ -421,9 +418,9 @@ class IStateManager(Protocol):
             to enable proper workflow resumption.
 
         Raises:
-            SessionNotFoundError: If session_id does not exist in storage
-            StorageError: If session cannot be loaded due to storage issues
-            CorruptionError: If stored session data is corrupted or invalid
+            zenyth.core.exceptions.SessionNotFoundError: If session_id does not exist in storage
+            zenyth.core.exceptions.StorageError: If session cannot be loaded due to storage issues
+            zenyth.core.exceptions.CorruptionError: If stored session data is corrupted or invalid
             PermissionError: If insufficient permissions for read operation
 
         Examples:

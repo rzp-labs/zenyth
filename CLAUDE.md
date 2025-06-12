@@ -4,15 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Mandatory Initialization Requirements
 
-**[CRITICAL]**
-
-- You **MUST** use `serena` for all file system operations
 - You **MUST** complete the checklist below before responding to **ANY** user request:
 
 ```text
 [SESSION START CHECKLIST]
 □ 1. Read all files from @agent/rules and @docs/
-□ 2. Initialize ConPort (if database exists):
+□ 2. Retreive context from ConPort (if database exists):
    □ get_product_context
    □ get_active_context
    □ get_decisions (limit 5)

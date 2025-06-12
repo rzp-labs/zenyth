@@ -108,7 +108,11 @@ class ValidationResult:
         self.errors: list[ValidationError] = []
 
     def add_error(
-        self, field: str, code: ErrorCode, message: str | None = None, **context: Any
+        self,
+        field: str,
+        code: ErrorCode,
+        message: str | None = None,
+        **context: Any,
     ) -> None:
         """Add validation error to the result.
 
@@ -122,7 +126,7 @@ class ValidationResult:
             message = f"{field}: {code.value}"
 
         self.errors.append(
-            ValidationError(field=field, code=code, message=message, context=context)
+            ValidationError(field=field, code=code, message=message, context=context),
         )
 
     def is_valid(self) -> bool:
@@ -174,7 +178,9 @@ class Validator:
         """
         if value is None:
             return ValidationError(
-                field=field, code=ErrorCode.REQUIRED, message="Task description required"
+                field=field,
+                code=ErrorCode.REQUIRED,
+                message="Task description required",
             )
         return None
 
@@ -191,7 +197,9 @@ class Validator:
         """
         if not value or not value.strip():
             return ValidationError(
-                field=field, code=ErrorCode.EMPTY, message="Task description empty"
+                field=field,
+                code=ErrorCode.EMPTY,
+                message="Task description empty",
             )
         return None
 

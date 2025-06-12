@@ -24,7 +24,7 @@ class MissingContentFieldError(ValueError):
     def __init__(self, received_fields: list[str]) -> None:
         """Initialize with the fields that were received."""
         super().__init__(
-            f"Invalid API response: missing 'content' field. Received: {received_fields}"
+            f"Invalid API response: missing 'content' field. Received: {received_fields}",
         )
 
 
@@ -34,7 +34,7 @@ class MissingSessionIdFieldError(ValueError):
     def __init__(self, received_fields: list[str]) -> None:
         """Initialize with the fields that were received."""
         super().__init__(
-            f"Invalid API response: missing 'session_id' field. Received: {received_fields}"
+            f"Invalid API response: missing 'session_id' field. Received: {received_fields}",
         )
 
 
@@ -57,7 +57,8 @@ class HTTPLLMProvider(LLMInterface):
         # Minimal HTTP implementation to pass tests
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.base_url}/v1/completions", json={"prompt": prompt, **kwargs}
+                f"{self.base_url}/v1/completions",
+                json={"prompt": prompt, **kwargs},
             )
             response.raise_for_status()
             data = response.json()
@@ -71,7 +72,8 @@ class HTTPLLMProvider(LLMInterface):
         """Generate chat completion response from the given prompt."""
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.base_url}/v1/chat/completions", json={"prompt": prompt, **kwargs}
+                f"{self.base_url}/v1/chat/completions",
+                json={"prompt": prompt, **kwargs},
             )
             response.raise_for_status()
             data = response.json()
@@ -100,7 +102,10 @@ class HTTPLLMProvider(LLMInterface):
             return str(data["session_id"])
 
     async def complete_chat_with_session(
-        self, session_id: str, prompt: str, **kwargs: Any
+        self,
+        session_id: str,
+        prompt: str,
+        **kwargs: Any,
     ) -> LLMResponse:
         """Generate chat completion within an existing session."""
         async with httpx.AsyncClient() as client:
@@ -139,7 +144,8 @@ class HTTPLLMProvider(LLMInterface):
                 payload["name"] = name
 
             response = await client.post(
-                f"{self.base_url}/v1/sessions/{session_id}/fork", json=payload
+                f"{self.base_url}/v1/sessions/{session_id}/fork",
+                json=payload,
             )
             response.raise_for_status()
             data = response.json()
@@ -188,7 +194,8 @@ class HTTPLLMProvider(LLMInterface):
                     try:
                         data = json.loads(data_str)
                         yield LLMResponse(
-                            content=data["content"], metadata=data.get("metadata", {})
+                            content=data["content"],
+                            metadata=data.get("metadata", {}),
                         )
                     except json.JSONDecodeError:
                         # Skip malformed lines

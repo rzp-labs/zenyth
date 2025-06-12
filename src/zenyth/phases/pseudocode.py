@@ -163,7 +163,10 @@ class PseudocodeGenerator(ABC):
 
     @abstractmethod
     async def generate(
-        self, task_description: str, analysis: AlgorithmAnalysis, session_id: str
+        self,
+        task_description: str,
+        analysis: AlgorithmAnalysis,
+        session_id: str,
     ) -> PseudocodeDocument:
         """Generate pseudocode document from analysis.
 
@@ -245,7 +248,9 @@ class BasicAlgorithmAnalyzer:
 
         # Estimate complexity based on configuration
         complexity_estimate = self._estimate_complexity(
-            logical_steps, data_structures, control_flow
+            logical_steps,
+            data_structures,
+            control_flow,
         )
 
         return AlgorithmAnalysis(
@@ -298,7 +303,9 @@ class BasicAlgorithmAnalyzer:
         return steps[:MAX_STEP_COUNT]  # Limit to maximum steps
 
     def _identify_data_structures(
-        self, task_description: str, context: dict[str, Any]
+        self,
+        task_description: str,
+        context: dict[str, Any],
     ) -> list[str]:
         """Identify required data structures.
 
@@ -370,7 +377,10 @@ class BasicAlgorithmAnalyzer:
         return flows or ["sequential"]
 
     def _estimate_complexity(
-        self, logical_steps: list[str], data_structures: list[str], control_flow: list[str]
+        self,
+        logical_steps: list[str],
+        data_structures: list[str],
+        control_flow: list[str],
     ) -> str:
         """Estimate algorithmic complexity.
 
@@ -428,7 +438,10 @@ class BasicPseudocodeGenerator:
         self._generation_count = 0
 
     async def generate(
-        self, task_description: str, analysis: AlgorithmAnalysis, session_id: str
+        self,
+        task_description: str,
+        analysis: AlgorithmAnalysis,
+        session_id: str,
     ) -> PseudocodeDocument:
         """Generate structured pseudocode document from analysis.
 
@@ -497,7 +510,7 @@ class BasicPseudocodeGenerator:
                     f"- Steps: {', '.join(analysis.logical_steps[:MIN_STEPS_FOR_COMPLEXITY])}"
                     f"{'...' if len(analysis.logical_steps) > MIN_STEPS_FOR_COMPLEXITY else ''}",
                     f"- Structures: {', '.join(analysis.data_structures)}",
-                ]
+                ],
             )
 
         return "\n".join(overview_parts)
@@ -532,7 +545,7 @@ class BasicPseudocodeGenerator:
                 [
                     "",
                     "// Data Structure Initialization",
-                ]
+                ],
             )
             for structure in analysis.data_structures:
                 logic_steps.append(f"DECLARE {structure.lower()}_instance AS {structure}")
@@ -543,7 +556,7 @@ class BasicPseudocodeGenerator:
                 [
                     "",
                     f"// Control Flow: {', '.join(analysis.control_flow)}",
-                ]
+                ],
             )
 
         return logic_steps
@@ -576,7 +589,7 @@ class BasicPseudocodeGenerator:
                     "Consider breaking down into smaller components",
                     "Plan for modular architecture design",
                     "Review pseudocode for optimization opportunities",
-                ]
+                ],
             )
         elif analysis.complexity_estimate == "low":
             recommendations.append("Simple architecture should suffice")
@@ -702,7 +715,9 @@ class PseudocodeHandler(PhaseHandler):
 
             # Use injected strategy for pseudocode generation
             pseudocode_document = await self._pseudocode_generator.generate(
-                task_desc, analysis, context.session_id
+                task_desc,
+                analysis,
+                context.session_id,
             )
 
             # Serialize document for artifact storage
@@ -725,7 +740,8 @@ class PseudocodeHandler(PhaseHandler):
 
         except Exception as e:
             logger.exception(
-                "Pseudocode phase execution failed (execution #%d)", self._execution_count
+                "Pseudocode phase execution failed (execution #%d)",
+                self._execution_count,
             )
             raise PhaseExecutionFailedError from e
 
@@ -781,7 +797,9 @@ class PseudocodeHandler(PhaseHandler):
         # Additional validation based on instance configuration
         if self._include_error_handling and (
             error := validator.validate_min_length(
-                task_desc, "task_description", MIN_COMPLEXITY_THRESHOLD
+                task_desc,
+                "task_description",
+                MIN_COMPLEXITY_THRESHOLD,
             )
         ):
             result.errors.append(error)

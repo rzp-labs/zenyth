@@ -45,6 +45,7 @@ Thread Safety:
     atomic modulo arithmetic to prevent race conditions.
 """
 
+import asyncio
 from collections.abc import AsyncGenerator
 from typing import Any
 
@@ -223,7 +224,10 @@ class MockLLMProvider:
         return f"mock-session-{self._call_count}"
 
     async def complete_chat_with_session(
-        self, session_id: str, prompt: str, **kwargs: Any
+        self,
+        session_id: str,
+        prompt: str,
+        **kwargs: Any,
     ) -> LLMResponse:
         """Generate a mock chat completion within a session."""
         response = await self.generate(prompt, **kwargs)
@@ -239,13 +243,19 @@ class MockLLMProvider:
 
     async def fork_session(self, session_id: str, name: str | None = None) -> str:
         """Fork a mock session."""
+        # Track session forks for testing
         fork_name = name or "default"
-        return f"{session_id}-fork-{fork_name}"
+        fork_id = f"{session_id}-fork-{fork_name}"
+        self._prompts.append(f"[FORK: {fork_id}]")  # Track fork operations
+        return fork_id
 
     async def revert_session(self, session_id: str, steps: int = 1) -> None:
-        """Mock session reversion (no-op)."""
-        # Mock implementation - just track the call
-        _ = (session_id, steps)
+        """Mock session reversion - removes last N prompts."""
+        # Track reversion for testing purposes
+        self._prompts.append(f"[REVERT: {session_id} by {steps} steps]")
+        # Simulate reversion by removing prompts
+        if steps > 0 and len(self._prompts) > steps:
+            self._prompts = self._prompts[:-steps]
 
     async def get_session_metadata(self, session_id: str) -> dict[str, Any]:
         """Get mock session metadata."""
@@ -267,7 +277,11 @@ class MockLLMProvider:
 
             # Generate response chunks
             if self._should_raise:
-                raise RuntimeError("Mock LLM configured to raise errors for testing")
+                msg = "Mock LLM configured to raise errors for testing"
+                raise RuntimeError(msg)
+
+            # Small await to satisfy async requirement
+            await asyncio.sleep(0)
 
             response_index = (self._call_count - 1) % len(self._responses)
             response = self._responses[response_index]

@@ -159,6 +159,18 @@ class SPARCOrchestrator:
         # This will be injected or created based on configuration in future iterations
         self._phase_registry = None
 
+    def set_phase_registry(self, registry: "PhaseHandlerRegistry") -> None:
+        """Set the phase handler registry for the orchestrator.
+
+        This method is provided for testing and configuration flexibility.
+        In production, the registry would typically be injected via
+        dependency injection framework or configuration.
+
+        Args:
+            registry: PhaseHandlerRegistry instance to use
+        """
+        self._phase_registry = registry
+
     @staticmethod
     def _create_session_context(task: str, session_id: str, start_time: float) -> Any:
         """Create session context for workflow execution.
