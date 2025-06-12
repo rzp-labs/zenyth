@@ -331,3 +331,60 @@ class WorkflowResult:
     artifacts: dict[str, Any] = field(default_factory=dict)
     error: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)
+
+
+@dataclass(frozen=True)
+class LLMResponse:
+    """Immutable response container for LLM provider interactions.
+
+    Represents the complete response from an LLM provider, including the generated
+    content, metadata about the request/response cycle, and any additional context
+    needed for debugging and monitoring.
+
+    Designed for HTTP-based LLM providers following OpenAI-compatible API patterns,
+    with support for session management and streaming responses.
+
+    Attributes:
+        content: The generated text content from the LLM provider
+        metadata: Additional response metadata including usage stats, timing,
+                 session information, and provider-specific data
+
+    Examples:
+        Basic chat completion response::
+
+            response = LLMResponse(
+                content="The answer is 42",
+                metadata={
+                    "usage": {"total_tokens": 15, "prompt_tokens": 8, "completion_tokens": 7},
+                    "model": "claude-3-sonnet",
+                    "id": "chat-abc123",
+                    "duration_ms": 1200
+                }
+            )
+
+        Session-based response::
+
+            response = LLMResponse(
+                content="Continuing from previous context...",
+                metadata={
+                    "session_id": "sess_xyz789",
+                    "message_id": "msg_456",
+                    "usage": {"total_tokens": 25},
+                    "model": "claude-3-sonnet"
+                }
+            )
+
+        Streaming response chunk::
+
+            response = LLMResponse(
+                content="partial",
+                metadata={
+                    "streaming": True,
+                    "chunk_id": 3,
+                    "session_id": "sess_abc"
+                }
+            )
+    """
+
+    content: str
+    metadata: dict[str, Any] = field(default_factory=dict)

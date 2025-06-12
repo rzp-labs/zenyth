@@ -46,7 +46,7 @@ from zenyth.core.exceptions import (  # noqa: F401
     StorageError,
     ValidationError,
 )
-from zenyth.core.types import SessionContext, SPARCPhase
+from zenyth.core.types import LLMResponse, SessionContext, SPARCPhase
 
 
 @runtime_checkable
@@ -54,9 +54,8 @@ class LLMInterface(Protocol):
     """Minimal protocol for Large Language Model provider integration.
 
     Defines the essential contract that all LLM providers must implement to
-    participate in SPARC phase execution. The interface is deliberately minimal
-    to maximize compatibility across different LLM services while providing the
-    core functionality required for text generation.
+    participate in SPARC phase execution. Enhanced with session management
+    capabilities for complex workflows and conversation continuity.
 
     This protocol follows the Dependency Inversion Principle (DIP) by allowing
     high-level orchestration logic to depend on this abstraction rather than
@@ -68,139 +67,122 @@ class LLMInterface(Protocol):
     efficiency in constrained homelab environments.
 
     Methods:
-        generate: Asynchronously generate text response from a given prompt.
-                 Accepts arbitrary keyword arguments to support provider-specific
-                 parameters like temperature, max_tokens, model selection, etc.
-
-    Examples:
-        Implementing for OpenAI GPT::
-
-            class OpenAIProvider:
-                def __init__(self, api_key: str, model: str = "gpt-4"):
-                    self.client = openai.AsyncOpenAI(api_key=api_key)
-                    self.model = model
-
-                async def generate(self, prompt: str, **kwargs: Any) -> str:
-                    response = await self.client.chat.completions.create(
-                        model=kwargs.get("model", self.model),
-                        messages=[{"role": "user", "content": prompt}],
-                        temperature=kwargs.get("temperature", 0.7),
-                        max_tokens=kwargs.get("max_tokens", 1000)
-                    )
-                    return response.choices[0].message.content
-
-        Implementing for local Ollama::
-
-            class OllamaProvider:
-                def __init__(self, base_url: str, model: str):
-                    self.base_url = base_url
-                    self.model = model
-
-                async def generate(self, prompt: str, **kwargs: Any) -> str:
-                    async with aiohttp.ClientSession() as session:
-                        payload = {
-                            "model": kwargs.get("model", self.model),
-                            "prompt": prompt,
-                            "stream": False
-                        }
-                        async with session.post(f"{self.base_url}/api/generate",
-                                               json=payload) as response:
-                            result = await response.json()
-                            return result["response"]
-
-        Testing with mock implementation::
-
-            class MockLLMProvider:
-                def __init__(self, responses: list[str]):
-                    self.responses = responses
-                    self.call_count = 0
-
-                async def generate(self, prompt: str, **kwargs: Any) -> str:
-                    response = self.responses[self.call_count % len(self.responses)]
-                    self.call_count += 1
-                    return f"Mock response to '{prompt}': {response}"
-
-    Note:
-        Implementations should handle errors appropriately and may raise exceptions
-        for network failures, API errors, or invalid parameters. The protocol does
-        not specify error handling to allow providers flexibility in error management
-        strategies appropriate for their service characteristics.
-
-        The **kwargs parameter allows providers to accept arbitrary configuration
-        parameters without requiring interface changes, supporting extensibility
-        while maintaining backward compatibility.
+        generate: Legacy method for simple text generation (deprecated)
+        complete_chat: Generate response from a chat prompt
+        create_session: Create new conversation session
+        complete_chat_with_session: Generate response within existing session
+        get_session_history: Retrieve session conversation history
+        fork_session: Create branched session for parallel exploration
+        revert_session: Remove messages from session history
+        get_session_metadata: Get session metadata and statistics
+        stream_chat: Stream chat completion responses in real-time
     """
 
     async def generate(self, prompt: str, **kwargs: Any) -> str:
         """Generate text response from the given prompt.
 
-        Asynchronously processes the input prompt using the underlying LLM service
-        and returns the generated text response. This method serves as the primary
-        interface for all text generation operations in SPARC phase execution.
+        Legacy method maintained for backward compatibility.
+        New implementations should prefer complete_chat.
+        """
+        ...
+
+    async def complete_chat(self, prompt: str, **kwargs: Any) -> LLMResponse:
+        """Generate chat completion response from the given prompt.
+
+        Primary interface for single-turn chat interactions without session state.
+        Returns structured response with content and metadata.
 
         Args:
-            prompt: The input text prompt to process. Should be well-formatted
-                   and contain clear instructions or questions for the LLM.
-                   Maximum length depends on the provider's context window.
-            **kwargs: Additional provider-specific parameters that may include:
-                     - temperature: Randomness control (0.0-2.0 typical range)
-                     - max_tokens: Maximum tokens to generate
-                     - model: Specific model variant to use
-                     - top_p: Nucleus sampling parameter
-                     - frequency_penalty: Repetition penalty
-                     - presence_penalty: Topic penalty
-                     - stop: Stop sequences for generation termination
-                     - timeout: Request timeout in seconds
+            prompt: The input text prompt to process
+            **kwargs: Provider-specific parameters (model, temperature, etc.)
 
         Returns:
-            The generated text response as a string. The content and length
-            depend on the prompt, provider capabilities, and configuration
-            parameters. Empty strings are valid responses for certain prompts.
+            LLMResponse containing generated content and metadata
+        """
+        ...
 
-        Raises:
-            The protocol does not specify exact exceptions to allow provider
-            flexibility, but implementations typically raise:
-            - ConnectionError: For network connectivity issues
-            - TimeoutError: For request timeouts
-            - ValueError: For invalid parameters or prompt format
-            - AuthenticationError: For API key or credential issues
-            - RateLimitError: For API rate limit exceeded
-            - ProviderError: For service-specific errors
+    async def create_session(self) -> str:
+        """Create a new conversation session.
 
-        Examples:
-            Basic text generation::
+        Returns:
+            Unique session identifier for use in session-based operations
+        """
+        ...
 
-                llm = SomeLLMProvider()
-                response = await llm.generate("Explain quantum computing")
-                print(response)
+    async def complete_chat_with_session(
+        self, session_id: str, prompt: str, **kwargs: Any
+    ) -> LLMResponse:
+        """Generate chat completion within an existing session.
 
-            With provider-specific parameters::
+        Maintains conversation context across multiple interactions.
+        Critical for SPARC workflows where phases build on each other.
 
-                response = await llm.generate(
-                    "Write a Python function to sort a list",
-                    temperature=0.2,
-                    max_tokens=500,
-                    model="gpt-4-turbo"
-                )
+        Args:
+            session_id: Existing session identifier
+            prompt: The input text prompt to process
+            **kwargs: Provider-specific parameters
 
-            Error handling::
+        Returns:
+            LLMResponse containing generated content and session metadata
+        """
+        ...
 
-                try:
-                    response = await llm.generate(prompt, timeout=30)
-                except TimeoutError:
-                    response = "Generation timed out, please try again"
-                except Exception as e:
-                    logger.error(f"LLM generation failed: {e}")
-                    response = "Error occurred during generation"
+    async def get_session_history(self, session_id: str) -> dict[str, Any]:
+        """Retrieve conversation history for a session.
 
-        Note:
-            Implementations should be thread-safe and support concurrent calls
-            where the underlying service allows. Response times can vary significantly
-            based on prompt complexity, model size, and service load.
+        Returns:
+            Dictionary containing messages, metadata, and session statistics
+        """
+        ...
 
-            For homelab deployments, implementations should include appropriate
-            retry logic and fallback strategies to handle temporary service
-            unavailability or network issues.
+    async def fork_session(self, session_id: str, name: str | None = None) -> str:
+        """Create a branched session from an existing session.
+
+        Enables parallel exploration of different approaches while maintaining
+        the original conversation context. Perfect for SPARC architecture
+        phase exploration.
+
+        Args:
+            session_id: Parent session to fork from
+            name: Optional name for the forked session
+
+        Returns:
+            New session identifier for the forked session
+        """
+        ...
+
+    async def revert_session(self, session_id: str, steps: int = 1) -> None:
+        """Remove messages from session history.
+
+        Enables "undoing" problematic interactions and trying alternative
+        approaches. Critical for workflow debugging and refinement.
+
+        Args:
+            session_id: Session to modify
+            steps: Number of messages to remove (default 1)
+        """
+        ...
+
+    async def get_session_metadata(self, session_id: str) -> dict[str, Any]:
+        """Get metadata and statistics for a session.
+
+        Returns:
+            Dictionary containing session metadata, usage stats, timing info
+        """
+        ...
+
+    async def stream_chat(self, prompt: str, **kwargs: Any) -> Any:
+        """Stream chat completion responses in real-time.
+
+        Yields incremental response chunks for real-time monitoring and
+        early intervention. Critical for long-running tasks.
+
+        Args:
+            prompt: The input text prompt to process
+            **kwargs: Provider-specific parameters
+
+        Yields:
+            LLMResponse objects containing incremental content chunks
         """
         ...
 

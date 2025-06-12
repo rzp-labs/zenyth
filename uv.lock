@@ -479,14 +479,11 @@ wheels = [
 
 [[package]]
 name = "claude-code-sdk"
-version = "0.1.0"
+version = "0.1.1"
 source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "typing-extensions" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/ec/0c/20dad42913c8659d3012d009349196f8a99e9507de264e3959ccc273d738/claude_code_sdk-0.1.0.tar.gz", hash = "sha256:5efe4463ec72644a0c9b32c8032569669a3279a0df15b4bd16f2dd5503e8c7a2", size = 21381, upload-time = "2025-05-20T07:52:21.816Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/c9/33/666e90c7990d7351a6ab6e2d01a49a1305dc0c7413146cd1ab51d55c9ea9/claude_code_sdk-0.1.1.tar.gz", hash = "sha256:ffe1af261358e59255462fbff79c4055357f822762a2853147f58d978b7461c0", size = 825, upload-time = "2025-06-10T18:49:42.813Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f4/ce/2fa85b56f96119fd4af2a18511b7d2061f1e69ce0cccdb649a9866adab9a/claude_code_sdk-0.1.0-py3-none-any.whl", hash = "sha256:8552a2e405f810f728e0352cb23b804d825d6355703a8ad4149e550f59fbdb9f", size = 21540, upload-time = "2025-05-20T07:52:20.406Z" },
+    { url = "https://files.pythonhosted.org/packages/2b/2f/92286aedee704f5c4a28c1a1db5a515534e1d468c6a5869f5e7a88567023/claude_code_sdk-0.1.1-py3-none-any.whl", hash = "sha256:b41e4dd0b051fd42e1e8c6d9c7a2459e863f8c9863208634fb6c9eb8f3ac2eac", size = 1244, upload-time = "2025-06-10T18:49:42.002Z" },
 ]
 
 [[package]]
@@ -4048,6 +4045,7 @@ dependencies = [
     { name = "claude-code-sdk" },
     { name = "httpx" },
     { name = "mcp-agent" },
+    { name = "orjson" },
     { name = "pydantic" },
     { name = "rich" },
     { name = "structlog" },
@@ -4082,6 +4080,7 @@ requires-dist = [
     { name = "claude-code-sdk", specifier = ">=0.1.0" },
     { name = "httpx", specifier = ">=0.25.0" },
     { name = "mcp-agent", specifier = ">=0.1.0" },
+    { name = "orjson", specifier = ">=3.10.0" },
     { name = "pydantic", specifier = ">=2.0.0" },
     { name = "rich", specifier = ">=13.0.0" },
     { name = "structlog", specifier = ">=24.0.0" },

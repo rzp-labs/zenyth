@@ -7,13 +7,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 **[CRITICAL]**
 
 - You **MUST** use `serena` for all file system operations
-- You **MUST** read all lines when viewing or editing files
+
 - You **MUST** import all files from `@agent/rules` into your context
 - You **MUST** complete the checklist below before responding to **ANY** user request:
 
 ```text
 [SESSION START CHECKLIST]
-□ 1. Import all content from /Users/stephen/Projects/rzp-labs/zenyth/agent/rules
+□ 1. Import all content from @agent/rules and @docs/
 □ 2. Determine and declare active mode
 □ 3. Initialize ConPort (if database exists):
    □ get_product_context
@@ -39,13 +39,12 @@ Ready to assist with your request.
 
 ## Agent Rules and Communication
 
-> **THE USER WILL BE VERY SAD AND FRUSTRATED IF YOU DO NOT FOLLOW THESE RULES**
-
 ### [ALWAYS]
 
 - ALWAYS follow [SOLID principles](/Users/stephen/Projects/rzp-labs/zenyth/agent/rules/SOLID_PRINCIPLES.md)
 - ALWAYS consider the impact on other components before making changes
 - ALWAYS check for existing utilities/helpers before creating new ones
+- ALWAYS read all lines when viewing or editing files
 - ALWAYS form your tool use using the XML format specified for each tool
 - ALWAYS use <thinking> tags for every tool call or response
 - ALWAYS remove temporary files when no longer needed
@@ -53,14 +52,14 @@ Ready to assist with your request.
 
 ### [NEVER]
 
-- NEVER ignore the user
 - NEVER sacrifice accuracy
-- NEVER responde without a confidence score
-- NEVER begin editing a file before answering the user's question
+- NEVER begin editing a file when the user only asks a question
 - NEVER ask the user to perform an action that you are capable of
 - NEVER ask the user for information before searching
 - NEVER deviate from existing project standards and patterns
 - NEVER make architectural decisions without explicit approval
+- NEVER use #noqa to bypass linting or type checking
+- NEVER respond without a confidence score
 
 ## Important Constraints
 
@@ -72,7 +71,13 @@ Ready to assist with your request.
 
 ### Listen to the Guardrails
 
-**Key Principle**: SOLID principles and type checking are guardrails that guide us toward better design, not hindrances to bypass.
+**Key Principle**: SOLID principles and type checking are guides us toward better design, not hindrances to bypass.
+
+**Required Reading:**
+
+- [docs/balancing-semantic-clarity.md](docs/balancing-semantic-clarity.md)
+- [docs/challenging-rules-reference-guide.md](docs/challenging-rules-reference-guide.md)
+- [docs/structured-validation.md](docs/structured-validation.md)
 
 **What This Means:**
 - When linting rules warn "method could be static" → Consider if the method truly needs instance state
@@ -92,12 +97,6 @@ Ready to assist with your request.
 - Work with the language and tools, not against them
 - Let SOLID principles emerge naturally from good design choices
 
-**Evidence**: The PseudocodeHandler refactoring (removing `NoReturn` helpers and artificial patterns) resulted in:
-- Simpler, more readable code
-- All tests passing without modification of core logic
-- Better SOLID compliance achieved naturally
-- Type checking working with the design instead of against it
-
 ### ConPort Integration
 
 **Workspace ID:** `/Users/stephen/Projects/rzp-labs/zenyth`
@@ -109,9 +108,8 @@ Ready to assist with your request.
 3. **Actual Result**: What actually happened
 
 **Tool Usage Protocol:**
-- Explain intent before calling ConPort operations
-- Never mention specific ConPort operation names to user
-- Place ALL ConPort MCP tool calls at the very END of response messages
+- Explain intent before calling file operations
+- Place ALL MCP tool calls at the very END of response messages
 - Wait for results before proceeding with dependent actions
 
 ## Project Overview
@@ -123,52 +121,51 @@ Zenyth is a SPARC orchestration system that combines mcp-agent, Claude Code, and
 ### Environment Setup
 ```bash
 # Install dependencies
-pip install -e ".[dev]"
+source .venv/bin/activate && pip install -e ".[dev]"
 
 # Install pre-commit hooks
-pre-commit install
+source .venv/bin/activate && pre-commit install
 ```
 
 ### Code Quality
 ```bash
 # Format code
-black src/ tests/
+source .venv/bin/activate && black src/ tests/
 
 # Lint with ruff
-ruff check src/ tests/
+source .venv/bin/activate && ruff check src/ tests/
 
 # Type checking
-mypy src/
+source .venv/bin/activate && mypy src/
 
 # Security scanning
-bandit -r src/
+source .venv/bin/activate && bandit -r src/
 
 # Run all quality checks
-black src/ tests/ && ruff check src/ tests/ && mypy src/ && bandit -r src/
+source .venv/bin/activate && black src/ tests/ && ruff check src/ tests/ && mypy src/ && bandit -r src/
 ```
-
 ### Testing
 ```bash
 # Run all tests
-pytest
+source .venv/bin/activate && pytest
 
 # Run with coverage
-pytest --cov=zenyth --cov-report=html
+source .venv/bin/activate && pytest --cov=zenyth --cov-report=html
 
 # Run specific test types
-pytest -m "not integration"  # Unit tests only
-pytest -m integration        # Integration tests only
-pytest -m mcp               # MCP-related tests
-pytest -m slow              # Slow tests
+source .venv/bin/activate && pytest -m "not integration"  # Unit tests only
+source .venv/bin/activate && pytest -m integration        # Integration tests only
+source .venv/bin/activate && pytest -m mcp               # MCP-related tests
+source .venv/bin/activate && pytest -m slow              # Slow tests
 ```
 
 ### CLI Usage
 ```bash
 # Main entry point
-zenyth --help
+source .venv/bin/activate && zenyth --help
 
 # Run workflow
-zenyth workflow run --config workflow.yaml
+source .venv/bin/activate && zenyth workflow run --config workflow.yaml
 ```
 
 ## Architecture
@@ -209,7 +206,7 @@ Phases receive only relevant context to optimize memory usage:
 
 ## Configuration
 
-- `pyproject.toml`: Main project configuration with strict typing and quality tools
+- `pyproject.toml`: Main project configuration with strict typing and quality tools - uses UV
+- Python 3.11+ required
 - Line length: 100 characters (Black and Ruff)
-- Python 3.10+ required
 - Strict mypy configuration enabled

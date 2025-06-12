@@ -32,6 +32,7 @@ dependencies = [
     "structlog>=24.0.0",
     "tenacity>=8.0.0",
     "httpx>=0.25.0", # For HTTP-based MCP connections
+    "orjson>=3.10.0", # Fast JSON serialization
 ]
 
 [project.urls]
