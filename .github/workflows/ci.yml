@@ -143,7 +143,6 @@ jobs:
         name: test-results
         slug: rzp-labs/zenyth
         verbose: true
-        git_service: github
 
     # ============ SONARCLOUD ANALYSIS ============
     - name: SonarCloud Analysis
