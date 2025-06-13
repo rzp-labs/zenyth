@@ -1,5 +1,6 @@
 codecov:
   require_ci_to_pass: false
+  branch: main
 
 coverage:
   status:
@@ -18,6 +19,8 @@ comment:
   require_changes: false
   require_base: false
   require_head: true
+  branches:
+    - main
 
 # Enable test result processing
 cli:
