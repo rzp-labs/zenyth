@@ -106,6 +106,18 @@ jobs:
         uv run pytest --cov=zenyth --cov-report=xml --cov-report=term-missing \
           --junitxml=junit.xml -o junit_family=legacy -n auto
 
+    - name: Verify test artifacts
+      if: always()
+      run: |
+        echo "Checking for test artifacts..."
+        ls -la *.xml || echo "No XML files found"
+        if [ -f junit.xml ]; then
+          echo "junit.xml size: $(stat -f%z junit.xml 2>/dev/null || stat -c%s junit.xml) bytes"
+        fi
+        if [ -f coverage.xml ]; then
+          echo "coverage.xml size: $(stat -f%z coverage.xml 2>/dev/null || stat -c%s coverage.xml) bytes"
+        fi
+
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v5
       with:
@@ -121,6 +133,9 @@ jobs:
       uses: codecov/test-results-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./junit.xml
+        flags: unittests
+        name: test-results
 
     # ============ SONARCLOUD ANALYSIS ============
     - name: SonarCloud Analysis
