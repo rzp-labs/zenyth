@@ -71,29 +71,29 @@ jobs:
             return 1
           fi
         }
-        
+
         # Export function for subshells
         export -f run_check
-        
+
         # Run all checks in parallel
         (run_check "Black Format Check" "uv run black src/ tests/ --check --diff") &
         BLACK_PID=$!
-        
+
         (run_check "Ruff Linting" "uv run ruff check src/ tests/ --output-format=github") &
         RUFF_PID=$!
-        
+
         (run_check "MyPy Type Check" "uv run mypy src/ --no-error-summary") &
         MYPY_PID=$!
-        
+
         (run_check "Bandit Security" "uv run bandit -r src/ -ll") &
         BANDIT_PID=$!
-        
+
         # Wait for all and check results
         FAILED=0
         for pid in $BLACK_PID $RUFF_PID $MYPY_PID $BANDIT_PID; do
           wait $pid || FAILED=1
         done
-        
+
         if [ $FAILED -eq 1 ]; then
           echo "❌ One or more quality checks failed"
           exit 1
@@ -124,9 +124,10 @@ jobs:
         files: ./coverage.xml
         flags: unittests
         name: codecov-umbrella
-        fail_ci_if_error: false
+        fail_ci_if_error: true
         token: ${{ secrets.CODECOV_TOKEN }}
-        slug: nehpz/zenyth
+        slug: rzp-labs/zenyth
+        verbose: true
 
     - name: Upload test results to Codecov
       if: ${{ !cancelled() }}
@@ -136,6 +137,8 @@ jobs:
         file: ./junit.xml
         flags: unittests
         name: test-results
+        slug: rzp-labs/zenyth
+        verbose: true
 
     # ============ SONARCLOUD ANALYSIS ============
     - name: SonarCloud Analysis
